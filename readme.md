@@ -16,3 +16,15 @@ Contributations are much appreciated on the project, however do note that you *m
 
 ## Credits
 Obviously most of the credit here goes to [gainare_tottori](https://ks.fhs.sh/viewtopic.php?f=3&t=3071) on the Katawa Shoujo forums. Also major credit to 4LS since most of the characters belong to them. Theres alot of other properties I don't recongize, if somehow something that belongs to you is here and you don't like it please contact me on discord (my username is superboo07) instead of taking down the entire project. Due to most of this project not really belonging to me I do not require credit if you redistribute this project.
+
+## Ruffle Web Emulation
+
+You can emulate and play Katawa Crash in modern browsers using Ruffle (Flash WebAssembly emulator):
+
+1. Start the local Ruffle server:
+   ```bash
+   npm start
+   ```
+2. Open `http://localhost:8080` in your web browser.
+3. Use the web interface to switch between `Katawa.crash.swf` and `Source Code/_assets/assets.swf`, control playback (pause, restart, fullscreen, quality), and inspect Ruffle ActionScript 3 trace/log output.
+
