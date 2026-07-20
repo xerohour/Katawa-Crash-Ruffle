@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Katawa Crash - Ruffle Flash Emulation</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0d0f17;
+            --panel-bg: rgba(22, 26, 38, 0.85);
+            --panel-border: rgba(255, 255, 255, 0.1);
+            --accent-color: #e94560;
+            --accent-hover: #ff5277;
+            --text-main: #f1f1f6;
+            --text-muted: #8e94a5;
+            --success: #20bf6b;
+            --warning: #f7b731;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex; flex-direction: column;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 15% 15%, rgba(233, 69, 96, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 85% 85%, rgba(32, 191, 107, 0.05) 0%, transparent 40%);
+        }
+
+        header {
+            background: var(--panel-bg);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--panel-border);
+            padding: 1rem 2rem;
+            display: flex; align-items: center; justify-content: space-between;
+            position: sticky; top: 0; z-index: 100;
+        }
+
+        .brand { display: flex; align-items: center; gap: 0.75rem; }
+        .brand-icon {
+            width: 32px; height: 32px;
+            background: linear-gradient(135deg, var(--accent-color), #ff758c);
+            border-radius: 8px; display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 1.2rem; color: white;
+            box-shadow: 0 4px 12px rgba(233, 69, 96, 0.3);
+        }
+
+        .brand-title h1 {
+            font-size: 1.25rem; font-weight: 700; letter-spacing: -0.02em;
+            background: linear-gradient(90deg, #ffffff, #c2c8d8);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .brand-title p { font-size: 0.75rem; color: var(--text-muted); }
+
+        .header-actions { display: flex; gap: 1rem; align-items: center; }
+
+        .nav-btn {
+            color: white; text-decoration: none; font-size: 0.85rem; padding: 0.4rem 0.8rem;
+            background: rgba(255, 255, 255, 0.08); border: 1px solid var(--panel-border); border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+        .nav-btn:hover { background: rgba(255, 255, 255, 0.15); }
+
+        main {
+            flex: 1; display: flex; flex-direction: column; align-items: center;
+            padding: 2rem; max-width: 1200px; width: 100%; margin: 0 auto; gap: 1.5rem;
+        }
+
+        .emulator-card {
+            width: 100%; background: var(--panel-bg); border: 1px solid var(--panel-border);
+            border-radius: 16px; overflow: hidden; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+            display: flex; flex-direction: column;
+        }
+
+        .emulator-header {
+            padding: 0.75rem 1.25rem; background: rgba(0, 0, 0, 0.3);
+            border-bottom: 1px solid var(--panel-border);
+            display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+        }
+
+        .swf-selector-group { display: flex; align-items: center; gap: 0.5rem; }
+        .swf-selector-group label { font-size: 0.85rem; color: var(--text-muted); }
+
+        select, button {
+            font-family: inherit; background: rgba(255, 255, 255, 0.08);
+            border: 1px solid var(--panel-border); color: var(--text-main);
+            padding: 0.4rem 0.8rem; border-radius: 8px; font-size: 0.85rem;
+            cursor: pointer; transition: all 0.2s ease; outline: none;
+        }
+        select:hover, button:hover { background: rgba(255, 255, 255, 0.15); border-color: rgba(255, 255, 255, 0.25); }
+
+        button.primary { background: var(--accent-color); border-color: var(--accent-color); font-weight: 600; }
+        button.primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); box-shadow: 0 4px 12px rgba(233, 69, 96, 0.4); }
+
+        .emulator-viewport {
+            position: relative; width: 100%; aspect-ratio: 700 / 400; background: #000;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        #ruffle-container { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
+        #ruffle-container > * { width: 100% !important; height: 100% !important; }
+
+        .emulator-controls {
+            padding: 0.75rem 1.25rem; background: rgba(0, 0, 0, 0.4);
+            border-top: 1px solid var(--panel-border);
+            display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+        }
+
+        .control-group { display: flex; align-items: center; gap: 0.5rem; }
+
+        footer { text-align: center; padding: 1.5rem; color: var(--text-muted); font-size: 0.85rem; border-top: 1px solid var(--panel-border); margin-top: auto; }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="brand">
+            <div class="brand-icon">K</div>
+            <div class="brand-title">
+                <h1>Katawa Crash</h1>
+                <p>Ruffle SWF Flash Emulator</p>
+            </div>
+        </div>
+        <div class="header-actions">
+            <a href="index.html" class="nav-btn">⚡ Play Native HTML5 Version</a>
+        </div>
+    </header>
+
+    <main>
+        <div class="emulator-card">
+            <div class="emulator-header">
+                <div class="swf-selector-group">
+                    <label for="swf-select">Target SWF:</label>
+                    <select id="swf-select">
+                        <option value="Katawa.crash.swf">Katawa.crash.swf (Main Game v1.0.2)</option>
+                        <option value="Source Code/_assets/assets.swf">Source Code/_assets/assets.swf (Embedded Assets)</option>
+                    </select>
+                    <button id="btn-load" class="primary">Load SWF</button>
+                </div>
+                <div class="control-group">
+                    <button id="btn-restart">↻ Restart</button>
+                    <button id="btn-fullscreen">⛶ Fullscreen</button>
+                </div>
+            </div>
+
+            <div class="emulator-viewport">
+                <div id="ruffle-container"></div>
+            </div>
+
+            <div class="emulator-controls">
+                <div class="control-group">
+                    <button id="btn-playpause">⏸ Pause</button>
+                    <button id="btn-mute">🔊 Mute</button>
+                </div>
+                <div class="control-group">
+                    <label style="font-size: 0.8rem; color: var(--text-muted);" for="quality-select">Quality:</label>
+                    <select id="quality-select">
+                        <option value="high" selected>High</option>
+                        <option value="medium">Medium</option>
+                        <option value="low">Low</option>
+                    </select>
+                    <label style="font-size: 0.8rem; color: var(--text-muted);" for="scale-select">Scale:</label>
+                    <select id="scale-select">
+                        <option value="showAll" selected>Show All</option>
+                        <option value="exactFit">Exact Fit</option>
+                        <option value="noScale">No Scale</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        Katawa Crash Ruffle Flash Emulator Workbench
+    </footer>
+
+    <script src="https://unpkg.com/@ruffle-rs/ruffle"></script>
+    <script>
+        let player = null;
+        let isPaused = false;
+        let isMuted = false;
+
+        async function initRuffle(swfPath) {
+            const container = document.getElementById('ruffle-container');
+            container.innerHTML = '';
+
+            const ruffle = window.RufflePlayer ? window.RufflePlayer.newest() : null;
+            if (!ruffle) return;
+
+            player = ruffle.createPlayer();
+            container.appendChild(player);
+
+            player.config = {
+                autoplay: "on",
+                unmuteOverlay: "hidden",
+                letterbox: "on",
+                forceScale: true,
+                preloader: true,
+                splashScreen: false,
+                quality: document.getElementById('quality-select').value,
+                scale: document.getElementById('scale-select').value,
+                wmode: "direct"
+            };
+
+            try {
+                await player.load(swfPath);
+            } catch (err) {}
+        }
+
+        document.getElementById('btn-load').addEventListener('click', () => {
+            initRuffle(document.getElementById('swf-select').value);
+        });
+
+        document.getElementById('btn-restart').addEventListener('click', () => {
+            initRuffle(document.getElementById('swf-select').value);
+        });
+
+        document.getElementById('btn-playpause').addEventListener('click', (e) => {
+            if (!player) return;
+            if (isPaused) { player.play(); e.target.textContent = '⏸ Pause'; }
+            else { player.pause(); e.target.textContent = '▶ Play'; }
+            isPaused = !isPaused;
+        });
+
+        document.getElementById('btn-mute').addEventListener('click', (e) => {
+            if (!player) return;
+            isMuted = !isMuted;
+            player.volume = isMuted ? 0 : 1;
+            e.target.textContent = isMuted ? '🔇 Unmute' : '🔊 Mute';
+        });
+
+        document.getElementById('btn-fullscreen').addEventListener('click', () => {
+            if (player && player.enterFullscreen) player.enterFullscreen();
+        });
+
+        window.addEventListener('DOMContentLoaded', () => {
+            initRuffle('Katawa.crash.swf');
+        });
+    </script>
+</body>
+</html>

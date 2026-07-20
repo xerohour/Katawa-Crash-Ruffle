@@ -3,499 +3,833 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Katawa Crash - Ruffle Flash Emulation</title>
+    <title>Katawa Crash - Native HTML5 Edition</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #0d0f17;
-            --panel-bg: rgba(22, 26, 38, 0.85);
-            --panel-border: rgba(255, 255, 255, 0.1);
-            --accent-color: #e94560;
+            --bg-color: #0b0d14;
+            --panel-bg: rgba(20, 24, 38, 0.9);
+            --panel-border: rgba(255, 255, 255, 0.12);
+            --accent: #e94560;
+            --accent-glow: rgba(233, 69, 96, 0.4);
             --accent-hover: #ff5277;
+            --secondary: #00d2d3;
             --text-main: #f1f1f6;
             --text-muted: #8e94a5;
-            --success: #20bf6b;
-            --warning: #f7b731;
+            --gold: #f7b731;
+            --green: #20bf6b;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
+        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
         body {
-            font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-family: 'Outfit', -apple-system, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-main);
             min-height: 100vh;
-            display: flex;
-            flex-direction: column;
+            display: flex; flex-direction: column;
             overflow-x: hidden;
             background-image: 
-                radial-gradient(circle at 15% 15%, rgba(233, 69, 96, 0.08) 0%, transparent 40%),
-                radial-gradient(circle at 85% 85%, rgba(32, 191, 107, 0.05) 0%, transparent 40%);
+                radial-gradient(circle at 10% 20%, rgba(233, 69, 96, 0.1) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(0, 210, 211, 0.08) 0%, transparent 40%);
         }
 
         header {
             background: var(--panel-bg);
             backdrop-filter: blur(12px);
             border-bottom: 1px solid var(--panel-border);
-            padding: 1rem 2rem;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            position: sticky;
-            top: 0;
-            z-index: 100;
+            padding: 0.75rem 1.75rem;
+            display: flex; align-items: center; justify-content: space-between;
+            position: sticky; top: 0; z-index: 100;
         }
 
-        .brand {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-
+        .brand { display: flex; align-items: center; gap: 0.75rem; }
         .brand-icon {
-            width: 32px;
-            height: 32px;
-            background: linear-gradient(135deg, var(--accent-color), #ff758c);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 1.2rem;
-            color: white;
-            box-shadow: 0 4px 12px rgba(233, 69, 96, 0.3);
+            width: 36px; height: 36px;
+            background: linear-gradient(135deg, var(--accent), #ff758c);
+            border-radius: 10px; display: flex; align-items: center; justify-content: center;
+            font-weight: 800; font-size: 1.3rem; color: white;
+            box-shadow: 0 4px 14px var(--accent-glow);
         }
 
         .brand-title h1 {
-            font-size: 1.25rem;
-            font-weight: 700;
-            letter-spacing: -0.02em;
+            font-size: 1.25rem; font-weight: 800; letter-spacing: -0.02em;
             background: linear-gradient(90deg, #ffffff, #c2c8d8);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         }
+        .brand-title p { font-size: 0.75rem; color: var(--text-muted); }
 
-        .brand-title p {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-        }
+        .header-actions { display: flex; gap: 0.75rem; align-items: center; }
 
-        .header-actions {
-            display: flex;
-            gap: 1rem;
-            align-items: center;
+        .btn-link {
+            color: var(--text-main); text-decoration: none; font-size: 0.85rem; font-weight: 600;
+            padding: 0.45rem 0.9rem; background: rgba(255, 255, 255, 0.08);
+            border: 1px solid var(--panel-border); border-radius: 8px;
+            transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 0.4rem;
         }
-
-        .status-badge {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.35rem 0.85rem;
-            background: rgba(32, 191, 107, 0.15);
-            border: 1px solid rgba(32, 191, 107, 0.3);
-            border-radius: 20px;
-            font-size: 0.8rem;
-            color: var(--success);
-            font-weight: 500;
-        }
-
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            background-color: var(--success);
-            border-radius: 50%;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.4; transform: scale(1.2); }
-            100% { opacity: 1; transform: scale(1); }
-        }
+        .btn-link:hover { background: rgba(255, 255, 255, 0.16); border-color: rgba(255, 255, 255, 0.3); }
 
         main {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 2rem;
-            max-width: 1200px;
-            width: 100%;
-            margin: 0 auto;
-            gap: 1.5rem;
+            flex: 1; display: flex; flex-direction: column; align-items: center;
+            padding: 1.5rem; max-width: 900px; width: 100%; margin: 0 auto; gap: 1.25rem;
         }
 
-        .emulator-card {
+        .game-wrapper {
             width: 100%;
             background: var(--panel-bg);
             border: 1px solid var(--panel-border);
             border-radius: 16px;
             overflow: hidden;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
-            display: flex;
-            flex-direction: column;
+            box-shadow: 0 24px 48px rgba(0, 0, 0, 0.6);
+            display: flex; flex-direction: column;
+            position: relative;
         }
 
-        .emulator-header {
-            padding: 0.75rem 1.25rem;
-            background: rgba(0, 0, 0, 0.3);
-            border-bottom: 1px solid var(--panel-border);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 1rem;
-            flex-wrap: wrap;
-        }
-
-        .swf-selector-group {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .swf-selector-group label {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-        }
-
-        select, button {
-            font-family: inherit;
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid var(--panel-border);
-            color: var(--text-main);
-            padding: 0.4rem 0.8rem;
-            border-radius: 8px;
-            font-size: 0.85rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            outline: none;
-        }
-
-        select:hover, button:hover {
-            background: rgba(255, 255, 255, 0.15);
-            border-color: rgba(255, 255, 255, 0.25);
-        }
-
-        button.primary {
-            background: var(--accent-color);
-            border-color: var(--accent-color);
-            font-weight: 600;
-        }
-
-        button.primary:hover {
-            background: var(--accent-hover);
-            border-color: var(--accent-hover);
-            box-shadow: 0 4px 12px rgba(233, 69, 96, 0.4);
-        }
-
-        .emulator-viewport {
+        .canvas-container {
             position: relative;
             width: 100%;
             aspect-ratio: 700 / 400;
-            background: #000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            background: #101420;
+            overflow: hidden;
         }
 
-        #ruffle-container {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        canvas {
+            width: 100%; height: 100%; display: block;
         }
 
-        #ruffle-container > * {
-            width: 100% !important;
-            height: 100% !important;
+        /* Overlay UI Elements */
+        .hud-overlay {
+            position: absolute; top: 12px; left: 16px; right: 16px;
+            display: flex; justify-content: space-between; align-items: flex-start;
+            pointer-events: none; z-index: 10;
         }
 
-        .emulator-controls {
-            padding: 0.75rem 1.25rem;
-            background: rgba(0, 0, 0, 0.4);
-            border-top: 1px solid var(--panel-border);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 1rem;
-            flex-wrap: wrap;
-        }
-
-        .control-group {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .info-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1.5rem;
-            width: 100%;
-        }
-
-        .info-card {
-            background: var(--panel-bg);
+        .hud-card {
+            background: rgba(10, 12, 20, 0.75);
+            backdrop-filter: blur(8px);
             border: 1px solid var(--panel-border);
-            border-radius: 12px;
-            padding: 1.25rem;
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
+            padding: 8px 14px; border-radius: 10px;
+            font-family: 'JetBrains Mono', monospace; font-size: 0.85rem;
+            display: flex; flex-direction: column; gap: 2px;
         }
+        .hud-card .label { color: var(--text-muted); font-size: 0.68rem; text-transform: uppercase; }
+        .hud-card .val { color: var(--gold); font-weight: 700; font-size: 1.05rem; }
 
-        .info-card h2 {
-            font-size: 1rem;
-            font-weight: 600;
-            color: #ffffff;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
+        .aed-btn-wrapper {
+            pointer-events: auto;
         }
-
-        .console-box {
-            font-family: 'JetBrains Mono', monospace;
-            background: #08090d;
-            border: 1px solid var(--panel-border);
-            border-radius: 8px;
-            padding: 0.75rem;
-            height: 140px;
-            overflow-y: auto;
-            font-size: 0.78rem;
-            color: #d1d5db;
-            line-height: 1.4;
+        #aed-trigger-btn {
+            background: linear-gradient(135deg, #e94560, #ff758c);
+            border: none; color: white; padding: 10px 18px; border-radius: 30px;
+            font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 0.9rem;
+            cursor: pointer; box-shadow: 0 4px 16px var(--accent-glow);
+            transition: all 0.2s ease; display: flex; align-items: center; gap: 6px;
         }
+        #aed-trigger-btn:hover { transform: scale(1.05); background: linear-gradient(135deg, #ff5277, #ff8da1); }
+        #aed-trigger-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
 
-        .console-entry {
-            margin-bottom: 0.25rem;
-        }
-
-        .console-entry.info { color: #60a5fa; }
-        .console-entry.warn { color: var(--warning); }
-        .console-entry.error { color: var(--accent-color); }
-
-        footer {
-            text-align: center;
-            padding: 1.5rem;
-            color: var(--text-muted);
-            font-size: 0.85rem;
+        .game-controls {
+            padding: 0.85rem 1.25rem;
+            background: rgba(8, 10, 16, 0.95);
             border-top: 1px solid var(--panel-border);
-            margin-top: auto;
+            display: flex; align-items: center; justify-content: space-between; gap: 1rem;
         }
 
-        footer a {
-            color: var(--accent-color);
-            text-decoration: none;
+        .ctrl-btn {
+            font-family: inherit; font-weight: 600; font-size: 0.85rem;
+            background: rgba(255, 255, 255, 0.08); border: 1px solid var(--panel-border);
+            color: var(--text-main); padding: 0.45rem 0.9rem; border-radius: 8px;
+            cursor: pointer; transition: all 0.2s ease; outline: none;
+        }
+        .ctrl-btn:hover { background: rgba(255, 255, 255, 0.16); border-color: rgba(255, 255, 255, 0.3); }
+        .ctrl-btn.primary { background: var(--accent); border-color: var(--accent); }
+        .ctrl-btn.primary:hover { background: var(--accent-hover); box-shadow: 0 4px 12px var(--accent-glow); }
+
+        .info-cards {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.25rem; width: 100%;
         }
 
-        footer a:hover {
-            text-decoration: underline;
+        .card {
+            background: var(--panel-bg); border: 1px solid var(--panel-border);
+            border-radius: 14px; padding: 1.25rem; display: flex; flex-direction: column; gap: 0.75rem;
         }
+        .card h3 { font-size: 1rem; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 0.5rem; }
+        .card p { font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; }
+
+        .ach-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 0.8rem; }
+        .ach-item {
+            background: rgba(255,255,255,0.04); border: 1px solid var(--panel-border);
+            padding: 6px 10px; border-radius: 6px; display: flex; align-items: center; gap: 8px;
+        }
+        .ach-item.unlocked { border-color: var(--green); background: rgba(32, 191, 107, 0.1); color: #fff; }
+
+        footer { text-align: center; padding: 1.5rem; color: var(--text-muted); font-size: 0.85rem; margin-top: auto; }
     </style>
 </head>
 <body>
-
     <header>
         <div class="brand">
             <div class="brand-icon">K</div>
             <div class="brand-title">
                 <h1>Katawa Crash</h1>
-                <p>ActionScript 3 Ruffle Emulation Environment</p>
+                <p>Native HTML5 Physics Engine</p>
             </div>
         </div>
         <div class="header-actions">
-            <div class="status-badge">
-                <span class="status-dot"></span>
-                <span>Ruffle Engine Active</span>
-            </div>
+            <a href="ruffle.html" class="btn-link">🎞 Flash Ruffle Mode</a>
         </div>
     </header>
 
     <main>
-        <div class="emulator-card">
-            <div class="emulator-header">
-                <div class="swf-selector-group">
-                    <label for="swf-select">Target SWF:</label>
-                    <select id="swf-select">
-                        <option value="Katawa.crash.swf">Katawa.crash.swf (Main Game v1.0.2)</option>
-                        <option value="Source Code/_assets/assets.swf">Source Code/_assets/assets.swf (Embedded Assets)</option>
-                    </select>
-                    <button id="btn-load" class="primary">Load SWF</button>
-                </div>
-                <div class="control-group">
-                    <button id="btn-restart">↻ Restart</button>
-                    <button id="btn-fullscreen">⛶ Fullscreen</button>
+        <div class="game-wrapper">
+            <div class="canvas-container">
+                <canvas id="gameCanvas" width="700" height="400"></canvas>
+                
+                <div class="hud-overlay" id="hud-overlay" style="display: none;">
+                    <div class="hud-card">
+                        <span class="label">Distance</span>
+                        <span class="val" id="hud-dist">0.00 m</span>
+                    </div>
+                    <div class="hud-card">
+                        <span class="label">Speed</span>
+                        <span class="val" id="hud-speed">0.0 km/h</span>
+                    </div>
+                    <div class="aed-btn-wrapper">
+                        <button id="aed-trigger-btn" disabled>⚡ AED Shock (<span id="aed-pct">0</span>%)</button>
+                    </div>
+                    <div class="hud-card">
+                        <span class="label">Best Record</span>
+                        <span class="val" id="hud-best">0.00 m</span>
+                    </div>
                 </div>
             </div>
 
-            <div class="emulator-viewport">
-                <div id="ruffle-container"></div>
-            </div>
-
-            <div class="emulator-controls">
-                <div class="control-group">
-                    <button id="btn-playpause">⏸ Pause</button>
-                    <button id="btn-mute">🔊 Mute</button>
+            <div class="game-controls">
+                <div style="display: flex; gap: 0.5rem;">
+                    <button class="ctrl-btn primary" id="btn-main-action">🚀 Launch Game</button>
+                    <button class="ctrl-btn" id="btn-reset">↻ Reset</button>
                 </div>
-                <div class="control-group">
-                    <label style="font-size: 0.8rem; color: var(--text-muted);" for="quality-select">Quality:</label>
-                    <select id="quality-select">
-                        <option value="high" selected>High</option>
-                        <option value="medium">Medium</option>
-                        <option value="low">Low</option>
-                    </select>
-
-                    <label style="font-size: 0.8rem; color: var(--text-muted);" for="scale-select">Scale:</label>
-                    <select id="scale-select">
-                        <option value="showAll" selected>Show All</option>
-                        <option value="exactFit">Exact Fit</option>
-                        <option value="noScale">No Scale</option>
-                    </select>
+                <div style="display: flex; gap: 0.5rem;">
+                    <button class="ctrl-btn" id="btn-sound-toggle">🔊 Sound: ON</button>
                 </div>
             </div>
         </div>
 
-        <div class="info-grid">
-            <div class="info-card">
-                <h2>💻 Decompiled Source Status</h2>
-                <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5;">
-                    The decompiled AS3 project is located in <code>/Source Code</code>, including <code>MainTimeline.as</code> and uncompressed XFL files in <code>/Source Code/Katawa crash</code>.
+        <div class="info-cards">
+            <div class="card">
+                <h3>🎮 How To Play</h3>
+                <p>
+                    <strong>1. Launch:</strong> Click or press <strong>SPACEBAR</strong> to set the launch angle arrow, then press again to set launcher power!<br>
+                    <strong>2. In Air:</strong> Tap <strong>SPACEBAR</strong> or click <strong>AED Shock</strong> when charged to trigger an emergency defibrillator speed boost!<br>
+                    <strong>3. Characters:</strong> Bounce off characters along the field (Emi, Rin, Lilly, Hanako, Shizune, Misha, Kenji, Nurse, Mutou) to gain speed & multipliers!
                 </p>
-                <div style="font-size: 0.8rem; background: rgba(255,255,255,0.04); padding: 0.5rem; border-radius: 6px; border: 1px solid var(--panel-border);">
-                    <strong>Engine:</strong> Ruffle (WebAssembly/Rust)<br>
-                    <strong>Flash Target:</strong> ActionScript 3.0 (AVM2)<br>
-                    <strong>Resolution:</strong> 700x400 @ 30 FPS
-                </div>
             </div>
-
-            <div class="info-card">
-                <h2>📜 Ruffle Emulator Console</h2>
-                <div class="console-box" id="console-output">
-                    <div class="console-entry info">[System] Initializing Ruffle Web player...</div>
+            <div class="card">
+                <h3>🏆 Achievements</h3>
+                <div class="ach-grid" id="ach-container">
+                    <div class="ach-item" id="ach-1">⭐ First Flight</div>
+                    <div class="ach-item" id="ach-2">🚀 High Flyer (>500m)</div>
+                    <div class="ach-item" id="ach-3">⚡ AED Shock Master</div>
+                    <div class="ach-item" id="ach-4">💥 Emi Shoryuken</div>
+                    <div class="ach-item" id="ach-5">🎨 Rin Art Multiplier</div>
+                    <div class="ach-item" id="ach-6">🏆 Century Club (>1000m)</div>
                 </div>
             </div>
         </div>
     </main>
 
     <footer>
-        Katawa Crash Decompilation & Ruffle Emulation Workbench &bull; Original Flash code by gainare_tottori &bull; Ruffle AS3 Engine
+        Katawa Crash Native HTML5 &bull; Pure Canvas 2D Engine &bull; Zero Flash/Ruffle Dependencies
     </footer>
 
-    <!-- Load Ruffle Web from UNPKG with fallback -->
-    <script src="https://unpkg.com/@ruffle-rs/ruffle"></script>
     <script>
-        const consoleOutput = document.getElementById('console-output');
+        // Audio Synthesizer via Web Audio API
+        class SoundEngine {
+            constructor() {
+                this.ctx = null;
+                this.enabled = true;
+            }
 
-        function logConsole(msg, type = 'info') {
-            const entry = document.createElement('div');
-            entry.className = `console-entry ${type}`;
-            const time = new Date().toLocaleTimeString();
-            entry.textContent = `[${time}] ${msg}`;
-            consoleOutput.appendChild(entry);
-            consoleOutput.scrollTop = consoleOutput.scrollHeight;
+            init() {
+                if (!this.ctx) {
+                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+            }
+
+            playLaunch() {
+                if (!this.enabled || !this.ctx) return;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(150, this.ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(600, this.ctx.currentTime + 0.3);
+                gain.gain.setValueAtTime(0.4, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.3);
+                osc.connect(gain); gain.connect(this.ctx.destination);
+                osc.start(); osc.stop(this.ctx.currentTime + 0.3);
+            }
+
+            playBounce() {
+                if (!this.enabled || !this.ctx) return;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(220, this.ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(80, this.ctx.currentTime + 0.15);
+                gain.gain.setValueAtTime(0.5, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.15);
+                osc.connect(gain); gain.connect(this.ctx.destination);
+                osc.start(); osc.stop(this.ctx.currentTime + 0.15);
+            }
+
+            playHit(type = 'default') {
+                if (!this.enabled || !this.ctx) return;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'triangle';
+                const baseFreq = type === 'emi' ? 523.25 : type === 'aed' ? 783.99 : 440;
+                osc.frequency.setValueAtTime(baseFreq, this.ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(baseFreq * 2, this.ctx.currentTime + 0.25);
+                gain.gain.setValueAtTime(0.5, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.25);
+                osc.connect(gain); gain.connect(this.ctx.destination);
+                osc.start(); osc.stop(this.ctx.currentTime + 0.25);
+            }
+
+            playAch() {
+                if (!this.enabled || !this.ctx) return;
+                const now = this.ctx.currentTime;
+                [523.25, 659.25, 783.99, 1046.50].forEach((freq, idx) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.frequency.setValueAtTime(freq, now + idx * 0.08);
+                    gain.gain.setValueAtTime(0.3, now + idx * 0.08);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + idx * 0.08 + 0.2);
+                    osc.connect(gain); gain.connect(this.ctx.destination);
+                    osc.start(now + idx * 0.08); osc.stop(now + idx * 0.08 + 0.2);
+                });
+            }
         }
 
-        let player = null;
-        let isPaused = false;
-        let isMuted = false;
+        const audio = new SoundEngine();
 
-        async function initRuffle(swfPath) {
-            logConsole(`Loading SWF: ${swfPath}...`, 'info');
-            const container = document.getElementById('ruffle-container');
-            container.innerHTML = '';
+        // Game State Constants
+        const STATE_MENU = 'MENU';
+        const STATE_ANGLE = 'ANGLE';
+        const STATE_POWER = 'POWER';
+        const STATE_FLIGHT = 'FLIGHT';
+        const STATE_GAMEOVER = 'GAMEOVER';
 
-            const ruffle = window.RufflePlayer ? window.RufflePlayer.newest() : null;
-            if (!ruffle) {
-                logConsole('Failed to load Ruffle Web Engine script!', 'error');
-                return;
+        // Main Engine Class
+        class KatawaCrashEngine {
+            constructor() {
+                this.canvas = document.getElementById('gameCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.state = STATE_MENU;
+
+                // Physics Constants
+                this.gravity = 0.38;
+                this.airDrag = 0.993;
+                this.bounceFriction = 0.75;
+                this.minBounceVel = 2.5;
+
+                // Game Variables
+                this.angle = 45;
+                this.angleDir = 1;
+                this.power = 50;
+                this.powerDir = 1;
+
+                this.hisao = { x: 80, y: 320, vx: 0, vy: 0, rot: 0, rotVel: 0, radius: 16 };
+                this.cameraX = 0;
+                this.distance = 0;
+                this.maxAltitude = 0;
+                this.topSpeed = 0;
+                this.combos = 0;
+                this.aedCharge = 0;
+
+                this.particles = [];
+                this.popups = [];
+                this.characters = [];
+
+                this.bestRecord = parseFloat(localStorage.getItem('kc_best') || 0);
+                this.unlockedAch = JSON.parse(localStorage.getItem('kc_ach') || '[]');
+
+                this.initDOM();
+                this.updateAchUI();
+                requestAnimationFrame(() => this.loop());
             }
 
-            player = ruffle.createPlayer();
-            container.appendChild(player);
+            initDOM() {
+                document.getElementById('hud-best').textContent = `${this.bestRecord.toFixed(2)} m`;
+                
+                const mainBtn = document.getElementById('btn-main-action');
+                const resetBtn = document.getElementById('btn-reset');
+                const aedBtn = document.getElementById('aed-trigger-btn');
+                const sndBtn = document.getElementById('btn-sound-toggle');
 
-            player.config = {
-                autoplay: "on",
-                unmuteOverlay: "hidden",
-                letterbox: "on",
-                forceScale: true,
-                preloader: true,
-                splashScreen: false,
-                quality: document.getElementById('quality-select').value,
-                scale: document.getElementById('scale-select').value,
-                wmode: "direct",
-                logLevel: "warn"
-            };
+                const handleAction = () => {
+                    audio.init();
+                    if (this.state === STATE_MENU || this.state === STATE_GAMEOVER) {
+                        this.startAnglePhase();
+                    } else if (this.state === STATE_ANGLE) {
+                        this.state = STATE_POWER;
+                        audio.playBounce();
+                    } else if (this.state === STATE_POWER) {
+                        this.launch();
+                    } else if (this.state === STATE_FLIGHT && this.aedCharge >= 100) {
+                        this.triggerAED();
+                    }
+                };
 
-            try {
-                await player.load(swfPath);
-                logConsole(`Successfully loaded ${swfPath} into Ruffle player.`, 'info');
-            } catch (err) {
-                logConsole(`Ruffle load error: ${err.message || err}`, 'error');
+                mainBtn.addEventListener('click', handleAction);
+                aedBtn.addEventListener('click', () => {
+                    audio.init();
+                    if (this.state === STATE_FLIGHT && this.aedCharge >= 100) this.triggerAED();
+                });
+                resetBtn.addEventListener('click', () => this.resetMenu());
+
+                sndBtn.addEventListener('click', () => {
+                    audio.enabled = !audio.enabled;
+                    sndBtn.textContent = audio.enabled ? '🔊 Sound: ON' : '🔇 Sound: OFF';
+                });
+
+                window.addEventListener('keydown', (e) => {
+                    if (e.code === 'Space') {
+                        e.preventDefault();
+                        handleAction();
+                    }
+                });
+            }
+
+            startAnglePhase() {
+                this.state = STATE_ANGLE;
+                this.angle = 45;
+                this.power = 50;
+                document.getElementById('btn-main-action').textContent = '🎯 Lock Angle';
+                document.getElementById('hud-overlay').style.display = 'none';
+            }
+
+            launch() {
+                this.state = STATE_FLIGHT;
+                document.getElementById('btn-main-action').textContent = '⚡ In Flight...';
+                document.getElementById('hud-overlay').style.display = 'flex';
+
+                const rad = (this.angle * Math.PI) / 180;
+                const speed = 12 + (this.power / 100) * 28;
+                this.hisao.vx = Math.cos(rad) * speed;
+                this.hisao.vy = -Math.sin(rad) * speed;
+                this.hisao.x = 80;
+                this.hisao.y = 320;
+                this.hisao.rot = -rad;
+                this.hisao.rotVel = 0.1;
+
+                this.cameraX = 0;
+                this.distance = 0;
+                this.maxAltitude = 0;
+                this.topSpeed = speed;
+                this.combos = 0;
+                this.aedCharge = 20;
+
+                this.spawnCharacters();
+                audio.playLaunch();
+
+                this.unlockAch('ach-1');
+            }
+
+            spawnCharacters() {
+                this.characters = [];
+                const types = [
+                    { name: 'Emi', color: '#ff6b6b', type: 'emi', title: 'SHORYUKEN BOOST!' },
+                    { name: 'Rin', color: '#48dbfb', type: 'rin', title: 'ART SPEED BOOST!' },
+                    { name: 'Lilly', color: '#feca57', type: 'lilly', title: 'HIGH ARCH BOOST!' },
+                    { name: 'Hanako', color: '#ff9ff3', type: 'hanako', title: 'PANIC EXPLOSION!' },
+                    { name: 'Shizune', color: '#1dd1a1', type: 'shizune', title: 'TACTICIAN BOOST!' },
+                    { name: 'Misha', color: '#ff6b81', type: 'misha', title: 'WAHAHA DRILL!' },
+                    { name: 'Nurse', color: '#2ed573', type: 'nurse', title: 'AED 100% RECHARGE!' }
+                ];
+
+                for (let d = 150; d < 15000; d += 120 + Math.random() * 180) {
+                    const charInfo = types[Math.floor(Math.random() * types.length)];
+                    this.characters.push({
+                        x: d, y: 335,
+                        radius: 18,
+                        color: charInfo.color,
+                        name: charInfo.name,
+                        type: charInfo.type,
+                        title: charInfo.title,
+                        hit: false
+                    });
+                }
+            }
+
+            triggerAED() {
+                if (this.aedCharge < 100) return;
+                this.aedCharge = 0;
+                this.hisao.vx += 16;
+                this.hisao.vy = -18;
+                this.hisao.rotVel += 0.3;
+                audio.playHit('aed');
+
+                this.addPopup('⚡ AED DEFIBRILLATOR SHOCK!', '#00d2d3');
+                this.addParticles(this.hisao.x, this.hisao.y, '#00d2d3', 25);
+                this.unlockAch('ach-3');
+            }
+
+            updateAchUI() {
+                this.unlockedAch.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.classList.add('unlocked');
+                });
+            }
+
+            unlockAch(id) {
+                if (!this.unlockedAch.includes(id)) {
+                    this.unlockedAch.push(id);
+                    localStorage.setItem('kc_ach', JSON.stringify(this.unlockedAch));
+                    this.updateAchUI();
+                    audio.playAch();
+                }
+            }
+
+            resetMenu() {
+                this.state = STATE_MENU;
+                document.getElementById('btn-main-action').textContent = '🚀 Launch Game';
+                document.getElementById('hud-overlay').style.display = 'none';
+            }
+
+            update() {
+                if (this.state === STATE_ANGLE) {
+                    this.angle += this.angleDir * 1.8;
+                    if (this.angle >= 80) { this.angle = 80; this.angleDir = -1; }
+                    if (this.angle <= 10) { this.angle = 10; this.angleDir = 1; }
+                } else if (this.state === STATE_POWER) {
+                    this.power += this.powerDir * 2.5;
+                    if (this.power >= 100) { this.power = 100; this.powerDir = -1; }
+                    if (this.power <= 5) { this.power = 5; this.powerDir = 1; }
+                } else if (this.state === STATE_FLIGHT) {
+                    // Physics integration
+                    this.hisao.vy += this.gravity;
+                    this.hisao.vx *= this.airDrag;
+                    this.hisao.vy *= this.airDrag;
+
+                    this.hisao.x += this.hisao.vx;
+                    this.hisao.y += this.hisao.vy;
+                    this.hisao.rot += this.hisao.rotVel;
+
+                    this.distance = Math.max(0, (this.hisao.x - 80) / 10);
+                    const currentAlt = (320 - this.hisao.y) / 10;
+                    if (currentAlt > this.maxAltitude) this.maxAltitude = currentAlt;
+
+                    const curSpeed = Math.sqrt(this.hisao.vx ** 2 + this.hisao.vy ** 2) * 3.6;
+                    if (curSpeed > this.topSpeed) this.topSpeed = curSpeed;
+
+                    // Camera tracking
+                    this.cameraX = this.hisao.x - 180;
+
+                    // Ground Collision
+                    const groundY = 325;
+                    if (this.hisao.y >= groundY) {
+                        this.hisao.y = groundY;
+                        if (Math.abs(this.hisao.vy) > this.minBounceVel) {
+                            this.hisao.vy = -this.hisao.vy * this.bounceFriction;
+                            this.hisao.vx *= 0.88;
+                            audio.playBounce();
+                            this.addParticles(this.hisao.x, groundY, '#f7b731', 8);
+                        } else {
+                            this.hisao.vy = 0;
+                            this.hisao.vx *= 0.85;
+                            if (Math.abs(this.hisao.vx) < 0.2) {
+                                this.endGame();
+                            }
+                        }
+                    }
+
+                    // Character Collisions
+                    this.characters.forEach(char => {
+                        if (!char.hit) {
+                            const dx = this.hisao.x - char.x;
+                            const dy = this.hisao.y - char.y;
+                            const dist = Math.sqrt(dx * dx + dy * dy);
+                            if (dist < this.hisao.radius + char.radius) {
+                                char.hit = true;
+                                this.combos++;
+                                this.aedCharge = Math.min(100, this.aedCharge + 35);
+                                audio.playHit(char.type);
+
+                                if (char.type === 'emi') {
+                                    this.hisao.vx += 14; this.hisao.vy = -18;
+                                    this.unlockAch('ach-4');
+                                } else if (char.type === 'rin') {
+                                    this.hisao.vx += 20; this.hisao.vy = -8;
+                                    this.unlockAch('ach-5');
+                                } else if (char.type === 'lilly') {
+                                    this.hisao.vx += 10; this.hisao.vy = -24;
+                                } else if (char.type === 'hanako') {
+                                    this.hisao.vx += 18; this.hisao.vy = -12;
+                                } else if (char.type === 'nurse') {
+                                    this.aedCharge = 100;
+                                    this.hisao.vx += 12; this.hisao.vy = -10;
+                                } else {
+                                    this.hisao.vx += 12; this.hisao.vy = -12;
+                                }
+
+                                this.addPopup(`${char.name}: ${char.title}`, char.color);
+                                this.addParticles(char.x, char.y, char.color, 20);
+                            }
+                        }
+                    });
+
+                    // Achievements Check
+                    if (this.distance > 500) this.unlockAch('ach-2');
+                    if (this.distance > 1000) this.unlockAch('ach-6');
+
+                    // Update HUD DOM
+                    document.getElementById('hud-dist').textContent = `${this.distance.toFixed(2)} m`;
+                    document.getElementById('hud-speed').textContent = `${curSpeed.toFixed(1)} km/h`;
+                    document.getElementById('aed-pct').textContent = Math.floor(this.aedCharge);
+                    document.getElementById('aed-trigger-btn').disabled = this.aedCharge < 100;
+                }
+
+                // Update Particles & Popups
+                this.particles.forEach(p => {
+                    p.x += p.vx; p.y += p.vy; p.alpha -= 0.02;
+                });
+                this.particles = this.particles.filter(p => p.alpha > 0);
+
+                this.popups.forEach(p => {
+                    p.y -= 0.8; p.alpha -= 0.015;
+                });
+                this.popups = this.popups.filter(p => p.alpha > 0);
+            }
+
+            endGame() {
+                this.state = STATE_GAMEOVER;
+                document.getElementById('btn-main-action').textContent = '🔁 Play Again';
+
+                if (this.distance > this.bestRecord) {
+                    this.bestRecord = this.distance;
+                    localStorage.setItem('kc_best', this.bestRecord.toString());
+                    document.getElementById('hud-best').textContent = `${this.bestRecord.toFixed(2)} m`;
+                    this.addPopup('🎉 NEW HIGH SCORE RECORD!', '#20bf6b');
+                }
+            }
+
+            addParticles(x, y, color, count) {
+                for (let i = 0; i < count; i++) {
+                    const angle = Math.random() * Math.PI * 2;
+                    const spd = 1 + Math.random() * 6;
+                    this.particles.push({
+                        x, y,
+                        vx: Math.cos(angle) * spd,
+                        vy: Math.sin(angle) * spd,
+                        color, alpha: 1, size: 2 + Math.random() * 4
+                    });
+                }
+            }
+
+            addPopup(text, color) {
+                this.popups.push({
+                    text, color,
+                    x: this.hisao.x,
+                    y: this.hisao.y - 30,
+                    alpha: 1
+                });
+            }
+
+            draw() {
+                this.ctx.clearRect(0, 0, 700, 400);
+
+                // Parallax Background
+                const skyGrad = this.ctx.createLinearGradient(0, 0, 0, 320);
+                skyGrad.addColorStop(0, '#101728');
+                skyGrad.addColorStop(1, '#253556');
+                this.ctx.fillStyle = skyGrad;
+                this.ctx.fillRect(0, 0, 700, 320);
+
+                // Sun / Light orb
+                this.ctx.fillStyle = 'rgba(255, 230, 150, 0.15)';
+                this.ctx.beginPath();
+                this.ctx.arc(600 - (this.cameraX * 0.05) % 800, 80, 60, 0, Math.PI * 2);
+                this.ctx.fill();
+
+                // Parallax Trees
+                this.ctx.fillStyle = '#1a2840';
+                for (let i = -100; i < 900; i += 80) {
+                    const tx = i - (this.cameraX * 0.3) % 80;
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(tx, 320);
+                    this.ctx.lineTo(tx + 25, 240);
+                    this.ctx.lineTo(tx + 50, 320);
+                    this.ctx.fill();
+                }
+
+                // Ground & Dirt
+                this.ctx.fillStyle = '#20bf6b';
+                this.ctx.fillRect(0, 320, 700, 12);
+                this.ctx.fillStyle = '#3a2e2b';
+                this.ctx.fillRect(0, 332, 700, 68);
+
+                // Grid ground markers
+                this.ctx.fillStyle = 'rgba(255, 255, 255, 0.25)';
+                this.ctx.font = '11px "JetBrains Mono"';
+                for (let m = 0; m < 20000; m += 100) {
+                    const screenX = (m * 10 + 80) - this.cameraX;
+                    if (screenX >= -50 && screenX <= 750) {
+                        this.ctx.fillRect(screenX, 320, 2, 8);
+                        if (m % 500 === 0) {
+                            this.ctx.fillText(`${m}m`, screenX - 10, 345);
+                        }
+                    }
+                }
+
+                // Launcher Base
+                if (this.cameraX < 400) {
+                    const lx = 80 - this.cameraX;
+                    this.ctx.fillStyle = '#576574';
+                    this.ctx.fillRect(lx - 25, 300, 50, 20);
+                    this.ctx.fillStyle = '#e94560';
+                    this.ctx.fillRect(lx - 15, 285, 30, 15);
+                }
+
+                // Draw Field Characters
+                if (this.state === STATE_FLIGHT || this.state === STATE_GAMEOVER) {
+                    this.characters.forEach(char => {
+                        const cx = char.x - this.cameraX;
+                        if (cx >= -30 && cx <= 730) {
+                            this.ctx.fillStyle = char.hit ? '#8e94a5' : char.color;
+                            this.ctx.beginPath();
+                            this.ctx.arc(cx, char.y - 12, char.radius, 0, Math.PI * 2);
+                            this.ctx.fill();
+
+                            this.ctx.fillStyle = '#ffffff';
+                            this.ctx.font = 'bold 10px "Outfit"';
+                            this.ctx.textAlign = 'center';
+                            this.ctx.fillText(char.name, cx, char.y - 34);
+                        }
+                    });
+                }
+
+                // Draw Hisao
+                const hScreenX = this.hisao.x - this.cameraX;
+                this.ctx.save();
+                this.ctx.translate(hScreenX, this.hisao.y);
+                this.ctx.rotate(this.hisao.rot);
+
+                // Wheelchair / Sprite representation
+                this.ctx.fillStyle = '#f7b731';
+                this.ctx.beginPath();
+                this.ctx.arc(0, 0, this.hisao.radius, 0, Math.PI * 2);
+                this.ctx.fill();
+
+                this.ctx.fillStyle = '#ffffff';
+                this.ctx.fillRect(-6, -6, 12, 12);
+                this.ctx.restore();
+
+                // Draw Particles
+                this.particles.forEach(p => {
+                    this.ctx.fillStyle = p.color;
+                    this.ctx.globalAlpha = p.alpha;
+                    this.ctx.beginPath();
+                    this.ctx.arc(p.x - this.cameraX, p.y, p.size, 0, Math.PI * 2);
+                    this.ctx.fill();
+                });
+                this.ctx.globalAlpha = 1.0;
+
+                // Draw Popups
+                this.popups.forEach(p => {
+                    this.ctx.fillStyle = p.color;
+                    this.ctx.globalAlpha = p.alpha;
+                    this.ctx.font = 'bold 13px "Outfit"';
+                    this.ctx.textAlign = 'center';
+                    this.ctx.fillText(p.text, p.x - this.cameraX, p.y);
+                });
+                this.ctx.globalAlpha = 1.0;
+
+                // Angle & Power Gauges (during setup phases)
+                if (this.state === STATE_ANGLE || this.state === STATE_POWER) {
+                    const lx = 80 - this.cameraX;
+                    const ly = 300;
+
+                    // Angle Arrow
+                    const rad = (this.angle * Math.PI) / 180;
+                    const ax = lx + Math.cos(rad) * 60;
+                    const ay = ly - Math.sin(rad) * 60;
+                    this.ctx.strokeStyle = '#00d2d3';
+                    this.ctx.lineWidth = 4;
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(lx, ly);
+                    this.ctx.lineTo(ax, ay);
+                    this.ctx.stroke();
+
+                    // Angle Text Overlay
+                    this.ctx.fillStyle = '#00d2d3';
+                    this.ctx.font = 'bold 14px "JetBrains Mono"';
+                    this.ctx.fillText(`ANGLE: ${Math.floor(this.angle)}°`, lx + 70, ly - 40);
+
+                    // Power Gauge Bar
+                    if (this.state === STATE_POWER) {
+                        this.ctx.fillStyle = 'rgba(0,0,0,0.6)';
+                        this.ctx.fillRect(lx + 70, ly - 20, 120, 16);
+                        this.ctx.fillStyle = '#e94560';
+                        this.ctx.fillRect(lx + 72, ly - 18, (this.power / 100) * 116, 12);
+                        this.ctx.fillStyle = '#ffffff';
+                        this.ctx.font = 'bold 11px "JetBrains Mono"';
+                        this.ctx.fillText(`POWER: ${Math.floor(this.power)}%`, lx + 70, ly + 12);
+                    }
+                }
+
+                // Game Over Overlay Banner
+                if (this.state === STATE_GAMEOVER) {
+                    this.ctx.fillStyle = 'rgba(11, 13, 20, 0.85)';
+                    this.ctx.fillRect(150, 80, 400, 240);
+                    this.ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+                    this.ctx.strokeRect(150, 80, 400, 240);
+
+                    this.ctx.fillStyle = '#f7b731';
+                    this.ctx.font = 'bold 22px "Outfit"';
+                    this.ctx.textAlign = 'center';
+                    this.ctx.fillText('📋 REPORT CARD', 350, 120);
+
+                    this.ctx.fillStyle = '#ffffff';
+                    this.ctx.font = '14px "JetBrains Mono"';
+                    this.ctx.fillText(`Total Distance: ${this.distance.toFixed(2)} m`, 350, 160);
+                    this.ctx.fillText(`Max Altitude: ${this.maxAltitude.toFixed(2)} m`, 350, 190);
+                    this.ctx.fillText(`Top Speed: ${this.topSpeed.toFixed(1)} km/h`, 350, 220);
+                    this.ctx.fillText(`Character Combos: ${this.combos}`, 350, 250);
+
+                    this.ctx.fillStyle = '#8e94a5';
+                    this.ctx.font = '12px "Outfit"';
+                    this.ctx.fillText('Press SPACEBAR or click Play Again to retry', 350, 290);
+                }
+
+                // Main Menu Overlay
+                if (this.state === STATE_MENU) {
+                    this.ctx.fillStyle = 'rgba(11, 13, 20, 0.75)';
+                    this.ctx.fillRect(0, 0, 700, 400);
+
+                    this.ctx.fillStyle = '#ffffff';
+                    this.ctx.font = '800 32px "Outfit"';
+                    this.ctx.textAlign = 'center';
+                    this.ctx.fillText('KATAWA CRASH', 350, 160);
+
+                    this.ctx.fillStyle = '#8e94a5';
+                    this.ctx.font = '14px "Outfit"';
+                    this.ctx.fillText('Native HTML5 High-Performance Edition', 350, 195);
+                    this.ctx.fillText('Press Launch Game or SPACEBAR to Begin', 350, 240);
+                }
+            }
+
+            loop() {
+                this.update();
+                this.draw();
+                requestAnimationFrame(() => this.loop());
             }
         }
 
-        document.getElementById('btn-load').addEventListener('click', () => {
-            const path = document.getElementById('swf-select').value;
-            initRuffle(path);
-        });
-
-        document.getElementById('btn-restart').addEventListener('click', () => {
-            const path = document.getElementById('swf-select').value;
-            initRuffle(path);
-        });
-
-        document.getElementById('btn-playpause').addEventListener('click', (e) => {
-            if (!player) return;
-            if (isPaused) {
-                player.play();
-                e.target.textContent = '⏸ Pause';
-                logConsole('Playback resumed.', 'info');
-            } else {
-                player.pause();
-                e.target.textContent = '▶ Play';
-                logConsole('Playback paused.', 'info');
-            }
-            isPaused = !isPaused;
-        });
-
-        document.getElementById('btn-mute').addEventListener('click', (e) => {
-            if (!player) return;
-            isMuted = !isMuted;
-            player.volume = isMuted ? 0 : 1;
-            e.target.textContent = isMuted ? '🔇 Unmute' : '🔊 Mute';
-            logConsole(isMuted ? 'Audio muted.' : 'Audio unmuted.', 'info');
-        });
-
-        document.getElementById('btn-fullscreen').addEventListener('click', () => {
-            if (player && player.enterFullscreen) {
-                player.enterFullscreen();
-                logConsole('Entered fullscreen mode.', 'info');
-            }
-        });
-
-        document.getElementById('quality-select').addEventListener('change', (e) => {
-            if (player && player.config) {
-                player.config.quality = e.target.value;
-                logConsole(`Quality set to: ${e.target.value}`, 'info');
-            }
-        });
-
-        document.getElementById('scale-select').addEventListener('change', (e) => {
-            if (player && player.config) {
-                player.config.scale = e.target.value;
-                logConsole(`Scale set to: ${e.target.value}`, 'info');
-            }
-        });
-
-        window.addEventListener('DOMContentLoaded', () => {
-            initRuffle('Katawa.crash.swf');
+        window.addEventListener('load', () => {
+            window.game = new KatawaCrashEngine();
         });
     </script>
 </body>
