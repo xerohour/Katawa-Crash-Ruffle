@@ -1,0 +1,13 @@
+{
+  "name": "katawa-crash-ruffle",
+  "version": "1.0.2",
+  "description": "Ruffle Flash Player Emulation environment for Katawa Crash",
+  "type": "module",
+  "main": "server.mjs",
+  "scripts": {
+    "start": "node server.mjs"
+  },
+  "keywords": ["flash", "ruffle", "katawa-crash", "actionscript3", "emulation"],
+  "author": "Antigravity",
+  "license": "MIT"
+}
