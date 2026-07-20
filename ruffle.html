@@ -79,23 +79,25 @@
         }
 
         .emulator-header {
-            padding: 0.75rem 1.25rem; background: rgba(0, 0, 0, 0.3);
+            padding: 0.85rem 1.25rem; background: rgba(0, 0, 0, 0.3);
             border-bottom: 1px solid var(--panel-border);
             display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
         }
 
-        .swf-selector-group { display: flex; align-items: center; gap: 0.5rem; }
-        .swf-selector-group label { font-size: 0.85rem; color: var(--text-muted); }
+        .swf-selector-group { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; flex: 1; }
+        .swf-selector-group label { font-size: 0.85rem; color: var(--text-muted); white-space: nowrap; }
 
-        select, button {
+        select, input[type="text"], button {
             font-family: inherit; background: rgba(255, 255, 255, 0.08);
             border: 1px solid var(--panel-border); color: var(--text-main);
-            padding: 0.4rem 0.8rem; border-radius: 8px; font-size: 0.85rem;
-            cursor: pointer; transition: all 0.2s ease; outline: none;
+            padding: 0.45rem 0.8rem; border-radius: 8px; font-size: 0.85rem;
+            outline: none; transition: all 0.2s ease;
         }
+        input[type="text"] { min-width: 260px; flex: 1; }
+        input[type="text"]:focus { border-color: var(--accent-color); background: rgba(255, 255, 255, 0.12); }
         select:hover, button:hover { background: rgba(255, 255, 255, 0.15); border-color: rgba(255, 255, 255, 0.25); }
 
-        button.primary { background: var(--accent-color); border-color: var(--accent-color); font-weight: 600; }
+        button.primary { background: var(--accent-color); border-color: var(--accent-color); font-weight: 600; cursor: pointer; }
         button.primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); box-shadow: 0 4px 12px rgba(233, 69, 96, 0.4); }
 
         .emulator-viewport {
@@ -138,11 +140,13 @@
                     <label for="swf-select">Target SWF:</label>
                     <select id="swf-select">
                         <option value="Katawa.crash.swf">Katawa.crash.swf (Katawa Crash v1.0.2)</option>
-                        <option value="nanaca-crash_v110.swf">nanaca-crash_v110.swf (NANACA-CRASH v1.10)</option>
-                        <option value="https://archive.org/download/nanaca-crash_v110/nanaca-crash_v110.swf">NANACA-CRASH (Archive.org URL)</option>
+                        <option value="nanaca-crash_v110.swf">nanaca-crash_v110.swf (NANACA-CRASH Local)</option>
+                        <option value="https://archive.org/download/nanaca-crash_v110/nanaca-crash_v110.swf" selected>NANACA-CRASH (Archive.org URL)</option>
                         <option value="Source Code/_assets/assets.swf">Source Code/_assets/assets.swf (Embedded Assets)</option>
                     </select>
-                    <button id="btn-load" class="primary">Load SWF</button>
+
+                    <input type="text" id="custom-swf-input" value="https://archive.org/download/nanaca-crash_v110/nanaca-crash_v110.swf" placeholder="Enter SWF URL (e.g. https://...)" />
+                    <button id="btn-load" class="primary">🚀 Load SWF</button>
                 </div>
                 <div class="control-group">
                     <button id="btn-restart">↻ Restart</button>
@@ -211,15 +215,26 @@
 
             try {
                 await player.load(swfPath);
-            } catch (err) {}
+            } catch (err) {
+                console.warn('Ruffle load error:', err);
+            }
         }
 
+        const swfSelect = document.getElementById('swf-select');
+        const customInput = document.getElementById('custom-swf-input');
+
+        swfSelect.addEventListener('change', () => {
+            customInput.value = swfSelect.value;
+        });
+
         document.getElementById('btn-load').addEventListener('click', () => {
-            initRuffle(document.getElementById('swf-select').value);
+            const target = customInput.value.trim() || swfSelect.value;
+            initRuffle(target);
         });
 
         document.getElementById('btn-restart').addEventListener('click', () => {
-            initRuffle(document.getElementById('swf-select').value);
+            const target = customInput.value.trim() || swfSelect.value;
+            initRuffle(target);
         });
 
         document.getElementById('btn-playpause').addEventListener('click', (e) => {
@@ -241,7 +256,10 @@
         });
 
         window.addEventListener('DOMContentLoaded', () => {
-            initRuffle('Katawa.crash.swf');
+            const urlParams = new URLSearchParams(window.location.search);
+            const initialSwf = urlParams.get('swf') || 'https://archive.org/download/nanaca-crash_v110/nanaca-crash_v110.swf';
+            customInput.value = initialSwf;
+            initRuffle(initialSwf);
         });
     </script>
 </body>
