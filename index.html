@@ -9,11 +9,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #080a10;
-            --panel-bg: rgba(18, 22, 34, 0.92);
-            --panel-border: rgba(255, 255, 255, 0.14);
+            --bg-color: #06080f;
+            --panel-bg: rgba(16, 20, 32, 0.94);
+            --panel-border: rgba(255, 255, 255, 0.15);
             --accent: #e94560;
-            --accent-glow: rgba(233, 69, 96, 0.45);
+            --accent-glow: rgba(233, 69, 96, 0.5);
             --accent-hover: #ff5277;
             --secondary: #00d2d3;
             --text-main: #f1f1f6;
@@ -31,13 +31,13 @@
             display: flex; flex-direction: column;
             overflow-x: hidden;
             background-image: 
-                radial-gradient(circle at 10% 15%, rgba(233, 69, 96, 0.12) 0%, transparent 45%),
-                radial-gradient(circle at 90% 85%, rgba(0, 210, 211, 0.1) 0%, transparent 45%);
+                radial-gradient(circle at 15% 15%, rgba(233, 69, 96, 0.14) 0%, transparent 45%),
+                radial-gradient(circle at 85% 85%, rgba(0, 210, 211, 0.12) 0%, transparent 45%);
         }
 
         header {
             background: var(--panel-bg);
-            backdrop-filter: blur(12px);
+            backdrop-filter: blur(14px);
             border-bottom: 1px solid var(--panel-border);
             padding: 0.75rem 1.75rem;
             display: flex; align-items: center; justify-content: space-between;
@@ -72,7 +72,7 @@
 
         main {
             flex: 1; display: flex; flex-direction: column; align-items: center;
-            padding: 1.5rem; max-width: 920px; width: 100%; margin: 0 auto; gap: 1.25rem;
+            padding: 1.5rem; max-width: 940px; width: 100%; margin: 0 auto; gap: 1.25rem;
         }
 
         .game-wrapper {
@@ -81,7 +81,7 @@
             border: 1px solid var(--panel-border);
             border-radius: 16px;
             overflow: hidden;
-            box-shadow: 0 24px 48px rgba(0, 0, 0, 0.65);
+            box-shadow: 0 24px 48px rgba(0, 0, 0, 0.7);
             display: flex; flex-direction: column;
             position: relative;
         }
@@ -90,7 +90,7 @@
             position: relative;
             width: 100%;
             aspect-ratio: 700 / 400;
-            background: #090c14;
+            background: #060912;
             overflow: hidden;
         }
 
@@ -108,16 +108,16 @@
         }
 
         .hud-card {
-            background: rgba(8, 10, 18, 0.85);
+            background: rgba(6, 8, 16, 0.88);
             backdrop-filter: blur(10px);
             border: 1px solid var(--panel-border);
             padding: 8px 14px; border-radius: 10px;
             font-family: 'JetBrains Mono', monospace; font-size: 0.85rem;
             display: flex; flex-direction: column; gap: 2px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            box-shadow: 0 4px 14px rgba(0,0,0,0.5);
         }
-        .hud-card .label { color: var(--text-muted); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.05em; }
-        .hud-card .val { color: var(--gold); font-weight: 700; font-size: 1.1rem; }
+        .hud-card .label { color: var(--text-muted); font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.06em; }
+        .hud-card .val { color: var(--gold); font-weight: 700; font-size: 1.12rem; }
 
         .aed-btn-wrapper {
             pointer-events: auto;
@@ -126,7 +126,7 @@
             background: linear-gradient(135deg, #00b894, #00d2d3);
             border: none; color: white; padding: 10px 20px; border-radius: 30px;
             font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 0.92rem;
-            cursor: pointer; box-shadow: 0 4px 18px rgba(0, 210, 211, 0.4);
+            cursor: pointer; box-shadow: 0 4px 18px rgba(0, 210, 211, 0.45);
             transition: all 0.2s ease; display: flex; align-items: center; gap: 8px;
         }
         #aed-trigger-btn:hover { transform: scale(1.05); background: linear-gradient(135deg, #00cec9, #55efc4); }
@@ -134,7 +134,7 @@
 
         .game-controls {
             padding: 0.9rem 1.4rem;
-            background: rgba(6, 8, 14, 0.96);
+            background: rgba(4, 6, 12, 0.96);
             border-top: 1px solid var(--panel-border);
             display: flex; align-items: center; justify-content: space-between; gap: 1rem;
         }
@@ -200,12 +200,16 @@
                         <span class="label">Speed</span>
                         <span class="val" id="hud-speed">0.0 km/h</span>
                     </div>
+                    <div class="hud-card">
+                        <span class="label">Combo Streak</span>
+                        <span class="val" id="hud-combo" style="color: #48dbfb;">1x</span>
+                    </div>
                     <div class="aed-btn-wrapper">
                         <button id="aed-trigger-btn" disabled>⚡ AED Shock (<span id="aed-pct">0</span>%)</button>
                     </div>
                     <div class="hud-card">
                         <span class="label">Misha Boosts</span>
-                        <span class="val" id="hud-misha">3</span>
+                        <span class="val" id="hud-misha" style="color: #ff6b81;">3</span>
                     </div>
                     <div class="hud-card">
                         <span class="label">Best Record</span>
@@ -229,10 +233,10 @@
             <div class="card">
                 <h3>🎮 How To Play</h3>
                 <p>
-                    <strong>1. Launch:</strong> Press <strong>SPACEBAR</strong> or Click to set launch angle, then press again to set power!<br>
+                    <strong>1. Launch:</strong> Press <strong>SPACEBAR</strong> or Click to set launch angle, then press again to set launcher power!<br>
                     <strong>2. Skill Shot:</strong> Lock angle near <strong>45°</strong> and power at <strong>100%</strong> for a max launch velocity boost!<br>
                     <strong>3. Air Controls:</strong> Trigger <strong>AED Shock (SPACEBAR)</strong> when charged to 100% for a downward shock boost onto character targets!<br>
-                    <strong>4. Characters:</strong> Collide with Emi (Shoryuken), Rin (Art Multiplier), Lilly, Hanako, Shizune, Misha, Nurse & Mutou!
+                    <strong>4. Combo Multiplier:</strong> Chain character hits in the air without landing to multiply boost power (1x, 2x, 3x, 4x...)!
                 </p>
             </div>
             <div class="card">
@@ -341,7 +345,7 @@
                         this.audioCache[filename] = new Audio(`assets/audio/${filename}`);
                     }
                     const sound = this.audioCache[filename].cloneNode();
-                    sound.volume = 0.7;
+                    sound.volume = 0.75;
                     sound.play().catch(() => { if (fallbackSynthFn) fallbackSynthFn(); });
                 } catch (e) {
                     if (fallbackSynthFn) fallbackSynthFn();
@@ -367,6 +371,8 @@
                     this.playSoundFile('12_mishacresc.mp3', () => this.synthHit(784));
                 } else if (type === 'aed') {
                     this.playSoundFile('38_onfirefx.mp3', () => this.synthHit(880));
+                } else if (type === 'cameo' || type === 'chiharu') {
+                    this.playSoundFile('28_chiharuscream.mp3', () => this.synthHit(950));
                 } else {
                     this.playSoundFile('25_shorthit1.mp3', () => this.synthHit(440));
                 }
@@ -441,7 +447,7 @@
         const STATE_FLIGHT = 'FLIGHT';
         const STATE_GAMEOVER = 'GAMEOVER';
 
-        // Katawa Crash Flash-Identical Canvas Engine
+        // Katawa Crash Refined Canvas Engine
         class KatawaCrashEngine {
             constructor() {
                 this.canvas = document.getElementById('gameCanvas');
@@ -450,9 +456,9 @@
 
                 // Physics Constants (Matching ActionScript 3.0 decompilation)
                 this.gravity = 0.38;
-                this.airDrag = 0.993;
-                this.bounceFriction = 0.76;
-                this.minBounceVel = 2.2;
+                this.airDrag = 0.9935;
+                this.bounceFriction = 0.78;
+                this.minBounceVel = 2.0;
 
                 // Launch Controls
                 this.angle = 45;
@@ -463,10 +469,15 @@
                 // Hisao Player State
                 this.hisao = { x: 80, y: 320, vx: 0, vy: 0, rot: 0, rotVel: 0, radius: 20 };
                 this.cameraX = 0;
+                this.cameraY = 0;
+                this.targetCameraX = 0;
+                this.targetCameraY = 0;
+
                 this.distance = 0;
                 this.maxAltitude = 0;
                 this.topSpeed = 0;
                 this.combos = 0;
+                this.comboMultiplier = 1;
                 this.aedCharge = 0;
                 this.mishaBoosts = 3;
 
@@ -476,6 +487,7 @@
                 this.characters = [];
                 this.screenShake = 0;
                 this.effects = [];
+                this.speedLines = [];
 
                 this.bestRecord = parseFloat(localStorage.getItem('kc_best') || 0);
                 this.unlockedAch = JSON.parse(localStorage.getItem('kc_ach') || '[]');
@@ -545,13 +557,13 @@
                 document.getElementById('hud-overlay').style.display = 'flex';
 
                 const rad = (this.angle * Math.PI) / 180;
-                let speed = 13 + (this.power / 100) * 29;
+                let speed = 13 + (this.power / 100) * 30;
 
                 // Skill Shot Bonus (matching ActionScript doSkillShot)
                 if (Math.abs(this.angle - 45) <= 3 && this.power >= 95) {
-                    speed *= 1.25;
+                    speed *= 1.28;
                     this.addPopup('🔥 PERFECT SKILL SHOT BOOST!', '#f7b731');
-                    this.screenShake = 10;
+                    this.screenShake = 12;
                 }
 
                 this.hisao.vx = Math.cos(rad) * speed;
@@ -559,13 +571,18 @@
                 this.hisao.x = 80;
                 this.hisao.y = 320;
                 this.hisao.rot = -rad;
-                this.hisao.rotVel = 0.08;
+                this.hisao.rotVel = 0.09;
 
                 this.cameraX = 0;
+                this.cameraY = 0;
+                this.targetCameraX = 0;
+                this.targetCameraY = 0;
+
                 this.distance = 0;
                 this.maxAltitude = 0;
                 this.topSpeed = speed;
                 this.combos = 0;
+                this.comboMultiplier = 1;
                 this.aedCharge = 20;
                 this.mishaBoosts = 3;
 
@@ -575,26 +592,45 @@
                 this.unlockAch('ach-1');
             }
 
+            // Structured & Refined Generation of Boosts & Characters
             spawnCharacters() {
                 this.characters = [];
-                const charTypes = [
+                
+                // Early Launcher Pool (100m - 600m)
+                const launcherPool = [
                     { name: 'Emi', key: 'emi', title: 'SHORYUKEN BOOST!', color: '#ff6b6b' },
                     { name: 'Rin', key: 'rin', title: 'ART MULTIPLIER BOOST!', color: '#48dbfb' },
-                    { name: 'Lilly', key: 'lilly', title: 'HIGH ARC FLOAT!', color: '#feca57' },
+                    { name: 'Lilly', key: 'lilly', title: 'HIGH ARC FLOAT!', color: '#feca57' }
+                ];
+
+                // Mid Strategic Pool (600m - 3000m)
+                const midPool = [
                     { name: 'Hanako', key: 'hanako', title: 'PANIC EXPLOSION!', color: '#ff9ff3' },
                     { name: 'Shizune', key: 'shizune', title: 'TACTICIAN MIRROR BOOST!', color: '#1dd1a1' },
                     { name: 'Misha', key: 'misha', title: 'WAHAHA DRILL BOOST!', color: '#ff6b81' },
                     { name: 'Mutou', key: 'mutou', title: 'CHEMISTRY FLIP BOOST!', color: '#a55eea' },
                     { name: 'Nurse', key: 'nurse', title: 'AED 100% RECHARGE!', color: '#2ed573' },
-                    { name: 'Kenji', key: 'kenji', title: 'CONSPIRACY CATAPULT!', color: '#fa8231' },
-                    { name: 'Akira', key: 'akira', title: 'SECRET CAMEO BOOST!', color: '#fd9644' }
+                    { name: 'Kenji', key: 'kenji', title: 'CONSPIRACY CATAPULT!', color: '#fa8231' }
                 ];
 
-                for (let d = 120; d < 18000; d += 110 + Math.random() * 170) {
-                    const c = charTypes[Math.floor(Math.random() * charTypes.length)];
+                // Cameo Pool (> 1000m)
+                const cameoPool = [
+                    { name: 'Akira', key: 'akira', title: 'SECRET CAMEO BOOST!', color: '#fd9644' },
+                    { name: 'Chiharu', key: 'chiharu', title: 'SCREAMING SPEED BOOST!', color: '#eb4d4b' },
+                    { name: 'Kubo', key: 'kubo', title: 'KUBO MEGA BOUNCE!', color: '#6ab04c' },
+                    { name: 'Natsume', key: 'natsume', title: 'NATSUME SUPER CHARGE!', color: '#be2edd' },
+                    { name: 'Sharktopus', key: 'sharktopus1', title: 'SHARKTOPUS APOCALYPSE!', color: '#22a6b3' }
+                ];
+
+                for (let d = 120; d < 25000; d += 95 + Math.random() * 150) {
+                    let pool = midPool;
+                    if (d < 600) pool = launcherPool;
+                    else if (d > 1000 && Math.random() < 0.22) pool = cameoPool;
+
+                    const c = pool[Math.floor(Math.random() * pool.length)];
                     this.characters.push({
                         x: d, y: 320,
-                        radius: 20,
+                        radius: 22,
                         key: c.key,
                         name: c.name,
                         title: c.title,
@@ -607,27 +643,28 @@
             triggerAED() {
                 if (this.aedCharge < 100) return;
                 this.aedCharge = 0;
-                this.hisao.vx += 16;
-                this.hisao.vy = 18; // Shock downwards into characters
-                this.hisao.rotVel += 0.35;
+                this.hisao.vx += 18;
+                this.hisao.vy = 20; // Shock downwards into target characters
+                this.hisao.rotVel += 0.4;
                 audio.playHit('aed');
 
-                this.screenShake = 8;
+                this.screenShake = 10;
                 this.addPopup('⚡ DEFIBRILLATOR SHOCK!', '#00d2d3');
-                this.addParticles(this.hisao.x, this.hisao.y, '#00d2d3', 25);
-                this.effects.push({ type: 'aed_zap', x: this.hisao.x, y: this.hisao.y, life: 15 });
+                this.addParticles(this.hisao.x, this.hisao.y, '#00d2d3', 30);
+                this.effects.push({ type: 'aed_zap', x: this.hisao.x, y: this.hisao.y, life: 18 });
                 this.unlockAch('ach-3');
             }
 
             triggerMishaBoost() {
                 if (this.mishaBoosts <= 0) return;
                 this.mishaBoosts--;
-                this.hisao.vx += 12;
-                this.hisao.vy = -16;
+                this.hisao.vx += 14;
+                this.hisao.vy = -18;
                 audio.playHit('misha');
 
                 this.addPopup('🎀 MISHA MID-AIR BOOST!', '#ff6b81');
-                this.addParticles(this.hisao.x, this.hisao.y, '#ff6b81', 18);
+                this.addParticles(this.hisao.x, this.hisao.y, '#ff6b81', 20);
+                this.effects.push({ type: 'misha_drill', x: this.hisao.x, y: this.hisao.y, frame: 0, life: 15 });
             }
 
             updateAchUI() {
@@ -678,12 +715,28 @@
                     const curSpeed = Math.sqrt(this.hisao.vx ** 2 + this.hisao.vy ** 2) * 3.6;
                     if (curSpeed > this.topSpeed) this.topSpeed = curSpeed;
 
-                    // Camera tracking
-                    this.cameraX = Math.max(0, this.hisao.x - 180);
+                    // Dynamic Camera Smooth Interpolation
+                    this.targetCameraX = Math.max(0, this.hisao.x - 200);
+                    this.targetCameraY = Math.min(0, (this.hisao.y - 200) * 0.4);
+                    this.cameraX += (this.targetCameraX - this.cameraX) * 0.16;
+                    this.cameraY += (this.targetCameraY - this.cameraY) * 0.16;
 
                     // AED Natural Recharge
                     if (this.aedCharge < 100) {
-                        this.aedCharge = Math.min(100, this.aedCharge + 0.25);
+                        this.aedCharge = Math.min(100, this.aedCharge + 0.28);
+                    }
+
+                    // High-Speed Wind Lines & Flame Trail
+                    if (curSpeed > 45) {
+                        this.particles.push({
+                            x: this.hisao.x - this.hisao.vx * 1.5,
+                            y: this.hisao.y - this.hisao.vy * 1.5,
+                            vx: (Math.random() - 0.5) * 2 - this.hisao.vx * 0.3,
+                            vy: (Math.random() - 0.5) * 2 - this.hisao.vy * 0.3,
+                            color: curSpeed > 75 ? '#ff7675' : '#74b9ff',
+                            alpha: 0.8,
+                            size: 1.5 + Math.random() * 3
+                        });
                     }
 
                     // Ground Collision
@@ -692,10 +745,11 @@
                         this.hisao.y = groundY;
                         if (Math.abs(this.hisao.vy) > this.minBounceVel) {
                             this.hisao.vy = -this.hisao.vy * this.bounceFriction;
-                            this.hisao.vx *= 0.89;
+                            this.hisao.vx *= 0.90;
+                            this.comboMultiplier = 1; // Landing resets combo streak
                             audio.playBounce();
-                            this.addParticles(this.hisao.x, groundY, '#f7b731', 10);
-                            this.screenShake = 3;
+                            this.addParticles(this.hisao.x, groundY, '#f7b731', 12);
+                            this.screenShake = 4;
                         } else {
                             this.hisao.vy = 0;
                             this.hisao.vx *= 0.84;
@@ -705,44 +759,51 @@
                         }
                     }
 
-                    // Character Collisions
+                    // Character Collisions & Boost Generation
                     this.characters.forEach(char => {
                         if (!char.hit) {
                             const dx = this.hisao.x - char.x;
-                            const dy = this.hisao.y - (char.y - 15);
+                            const dy = this.hisao.y - (char.y - 20);
                             const dist = Math.sqrt(dx * dx + dy * dy);
                             if (dist < this.hisao.radius + char.radius) {
                                 char.hit = true;
                                 this.combos++;
+                                this.comboMultiplier++;
                                 this.aedCharge = Math.min(100, this.aedCharge + 35);
                                 audio.playHit(char.key);
-                                this.screenShake = 6;
+                                this.screenShake = 8;
+
+                                // Boost Calculation with Combo Multiplier Scaling
+                                const mult = 1 + (this.comboMultiplier - 1) * 0.22;
 
                                 if (char.key === 'emi') {
-                                    this.hisao.vx += 14; this.hisao.vy = -20;
-                                    this.effects.push({ type: 'shoryuken', x: char.x, y: char.y, frame: 0, maxFrame: 3, life: 20 });
+                                    this.hisao.vx += 15 * mult; this.hisao.vy = -22 * mult;
+                                    this.effects.push({ type: 'shoryuken', x: char.x, y: char.y, frame: 0, life: 25 });
                                     this.unlockAch('ach-4');
                                 } else if (char.key === 'rin') {
-                                    this.hisao.vx += 22; this.hisao.vy = -9;
+                                    this.hisao.vx += 24 * mult; this.hisao.vy = -10 * mult;
                                     this.unlockAch('ach-5');
                                 } else if (char.key === 'lilly') {
-                                    this.hisao.vx += 10; this.hisao.vy = -25;
+                                    this.hisao.vx += 12 * mult; this.hisao.vy = -27 * mult;
                                 } else if (char.key === 'hanako') {
-                                    this.hisao.vx += 18; this.hisao.vy = -14;
+                                    this.hisao.vx += 20 * mult; this.hisao.vy = -16 * mult;
                                 } else if (char.key === 'shizune') {
-                                    this.hisao.vx += 16; this.hisao.vy = -12;
+                                    this.hisao.vx += 18 * mult; this.hisao.vy = -14 * mult;
                                 } else if (char.key === 'misha') {
                                     this.mishaBoosts = Math.min(5, this.mishaBoosts + 2);
-                                    this.hisao.vx += 15; this.hisao.vy = -15;
+                                    this.hisao.vx += 16 * mult; this.hisao.vy = -16 * mult;
                                 } else if (char.key === 'nurse') {
                                     this.aedCharge = 100;
-                                    this.hisao.vx += 14; this.hisao.vy = -12;
+                                    this.hisao.vx += 15 * mult; this.hisao.vy = -14 * mult;
+                                } else if (char.key === 'chiharu' || char.key === 'sharktopus1' || char.key === 'kubo') {
+                                    this.hisao.vx += 28 * mult; this.hisao.vy = -24 * mult;
+                                    this.screenShake = 14;
                                 } else {
-                                    this.hisao.vx += 13; this.hisao.vy = -13;
+                                    this.hisao.vx += 14 * mult; this.hisao.vy = -14 * mult;
                                 }
 
-                                this.addPopup(`${char.name}: ${char.title}`, char.color);
-                                this.addParticles(char.x, char.y, char.color, 24);
+                                this.addPopup(`${char.name}: ${char.title} (${this.comboMultiplier}x)`, char.color);
+                                this.addParticles(char.x, char.y, char.color, 28);
                             }
                         }
                     });
@@ -754,6 +815,7 @@
                     // Update HUD DOM
                     document.getElementById('hud-dist').textContent = `${this.distance.toFixed(2)} m`;
                     document.getElementById('hud-speed').textContent = `${curSpeed.toFixed(1)} km/h`;
+                    document.getElementById('hud-combo').textContent = `${this.comboMultiplier}x`;
                     document.getElementById('hud-misha').textContent = this.mishaBoosts;
                     document.getElementById('aed-pct').textContent = Math.floor(this.aedCharge);
                     document.getElementById('aed-trigger-btn').disabled = this.aedCharge < 100;
@@ -767,12 +829,12 @@
                 this.effects = this.effects.filter(e => e.life > 0);
 
                 this.particles.forEach(p => {
-                    p.x += p.vx; p.y += p.vy; p.alpha -= 0.02;
+                    p.x += p.vx; p.y += p.vy; p.alpha -= 0.022;
                 });
                 this.particles = this.particles.filter(p => p.alpha > 0);
 
                 this.popups.forEach(p => {
-                    p.y -= 0.8; p.alpha -= 0.015;
+                    p.y -= 0.95; p.alpha -= 0.014;
                 });
                 this.popups = this.popups.filter(p => p.alpha > 0);
             }
@@ -792,7 +854,7 @@
             addParticles(x, y, color, count) {
                 for (let i = 0; i < count; i++) {
                     const angle = Math.random() * Math.PI * 2;
-                    const spd = 1 + Math.random() * 7;
+                    const spd = 1.5 + Math.random() * 7.5;
                     this.particles.push({
                         x, y,
                         vx: Math.cos(angle) * spd,
@@ -806,7 +868,7 @@
                 this.popups.push({
                     text, color,
                     x: this.hisao.x,
-                    y: this.hisao.y - 35,
+                    y: this.hisao.y - 40,
                     alpha: 1
                 });
             }
@@ -815,7 +877,8 @@
                 this.ctx.save();
                 this.ctx.clearRect(0, 0, 700, 400);
 
-                // Apply Screen Shake
+                // Apply Screen Shake & Camera Offset
+                const camOffsetY = this.cameraY;
                 if (this.screenShake > 0.5) {
                     const sx = (Math.random() - 0.5) * this.screenShake;
                     const sy = (Math.random() - 0.5) * this.screenShake;
@@ -833,85 +896,85 @@
                     // Deep Space Starfield
                     this.ctx.drawImage(starfieldBg, 0, 0, 700, 400);
                     if (bigEarthBg) {
-                        this.ctx.drawImage(bigEarthBg, 450 - (this.cameraX * 0.02) % 400, 50, 200, 200);
+                        this.ctx.drawImage(bigEarthBg, 440 - (this.cameraX * 0.02) % 400, 40 - camOffsetY * 0.2, 220, 220);
                     }
                 } else {
-                    // Normal Sky
+                    // Normal Sky Layer
                     if (skyBg) {
-                        this.ctx.drawImage(skyBg, 0, 0, 700, 320);
+                        this.ctx.drawImage(skyBg, 0, 0 - camOffsetY * 0.3, 700, 340);
                     } else {
                         const skyGrad = this.ctx.createLinearGradient(0, 0, 0, 320);
-                        skyGrad.addColorStop(0, '#0f172a');
-                        skyGrad.addColorStop(1, '#253556');
+                        skyGrad.addColorStop(0, '#0a1122');
+                        skyGrad.addColorStop(1, '#223354');
                         this.ctx.fillStyle = skyGrad;
                         this.ctx.fillRect(0, 0, 700, 320);
                     }
-                    if (altitude > 100 && planetEarthBg) {
-                        this.ctx.drawImage(planetEarthBg, 520 - (this.cameraX * 0.03) % 400, 40, 140, 140);
+                    if (altitude > 90 && planetEarthBg) {
+                        this.ctx.drawImage(planetEarthBg, 510 - (this.cameraX * 0.03) % 400, 30 - camOffsetY * 0.25, 150, 150);
                     }
                 }
 
                 // 2. PARALLAX FIELD BACKGROUNDS (Trees / Buildings)
                 const fbg1 = assets.getImage('field_bg1');
-                const fbg2 = assets.getImage('field_bg2');
-                const fbg3 = assets.getImage('field_bg3');
-
                 if (fbg1) {
                     const pX = (this.cameraX * 0.35) % fbg1.width;
                     for (let x = -pX; x < 700; x += fbg1.width) {
-                        this.ctx.drawImage(fbg1, x, 185);
+                        this.ctx.drawImage(fbg1, x, 185 - camOffsetY);
                     }
                 }
 
                 // 3. STARTING AREA BACKGROUND (School Building & Ramp)
                 const startBg = assets.getImage('starting_bg');
                 if (startBg && this.cameraX < 700) {
-                    this.ctx.drawImage(startBg, -this.cameraX, 185);
+                    this.ctx.drawImage(startBg, -this.cameraX, 185 - camOffsetY);
                 }
 
-                // 4. GROUND FLOOR & REPEATING GRASS TILE
+                // 4. GROUND FLOOR & ANCHORED REPEATING GRASS TILE
                 const grassTile = assets.getImage('grass_tile');
+                const groundY = 320 - camOffsetY;
                 if (grassTile) {
                     const gX = (this.cameraX) % grassTile.width;
                     for (let x = -gX; x < 700; x += grassTile.width) {
-                        this.ctx.drawImage(grassTile, x, 320);
+                        this.ctx.drawImage(grassTile, x, groundY);
                     }
                 } else {
                     this.ctx.fillStyle = '#20bf6b';
-                    this.ctx.fillRect(0, 320, 700, 12);
+                    this.ctx.fillRect(0, groundY, 700, 12);
                     this.ctx.fillStyle = '#3a2e2b';
-                    this.ctx.fillRect(0, 332, 700, 68);
+                    this.ctx.fillRect(0, groundY + 12, 700, 68);
                 }
 
                 // Ground Distance Markings (In Meters)
-                this.ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+                this.ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
                 this.ctx.font = 'bold 11px "JetBrains Mono"';
-                for (let m = 0; m < 20000; m += 100) {
+                for (let m = 0; m < 30000; m += 100) {
                     const screenX = (m * 10 + 80) - this.cameraX;
                     if (screenX >= -50 && screenX <= 750) {
-                        this.ctx.fillRect(screenX, 320, 2, 8);
+                        this.ctx.fillRect(screenX, groundY, 2, 8);
                         if (m % 500 === 0) {
-                            this.ctx.fillText(`${m}m`, screenX - 12, 345);
+                            this.ctx.fillText(`${m}m`, screenX - 12, groundY + 24);
                         }
                     }
                 }
 
-                // 5. CHARACTERS ALONG FIELD
+                // 5. ANCHORED CHARACTERS ALONG FIELD
                 if (this.state === STATE_FLIGHT || this.state === STATE_GAMEOVER) {
                     this.characters.forEach(char => {
                         const cx = char.x - this.cameraX;
-                        if (cx >= -40 && cx <= 740) {
+                        if (cx >= -50 && cx <= 750) {
                             const charImg = assets.getImage(char.key);
                             if (charImg) {
                                 const dw = charImg.width * 0.75;
                                 const dh = charImg.height * 0.75;
-                                if (char.hit) this.ctx.globalAlpha = 0.5;
-                                this.ctx.drawImage(charImg, cx - dw / 2, char.y - dh, dw, dh);
+                                // Anchor feet precisely to groundY
+                                const cy = groundY - dh + 2;
+                                if (char.hit) this.ctx.globalAlpha = 0.45;
+                                this.ctx.drawImage(charImg, cx - dw / 2, cy, dw, dh);
                                 this.ctx.globalAlpha = 1.0;
                             } else {
                                 this.ctx.fillStyle = char.hit ? '#8e94a5' : char.color;
                                 this.ctx.beginPath();
-                                this.ctx.arc(cx, char.y - 15, char.radius, 0, Math.PI * 2);
+                                this.ctx.arc(cx, groundY - 15, char.radius, 0, Math.PI * 2);
                                 this.ctx.fill();
                             }
 
@@ -919,37 +982,42 @@
                             this.ctx.fillStyle = '#ffffff';
                             this.ctx.font = 'bold 10px "Outfit"';
                             this.ctx.textAlign = 'center';
-                            this.ctx.fillText(char.name, cx, char.y - 45);
+                            this.ctx.fillText(char.name, cx, groundY - 48);
                         }
                     });
                 }
 
-                // 6. SPECIAL VISUAL EFFECTS OVERLAYS
+                // 6. SPECIAL VISUAL EFFECTS OVERLAYS (Shoryuken & AED Shock)
                 this.effects.forEach(eff => {
                     const ex = eff.x - this.cameraX;
+                    const ey = eff.y - camOffsetY;
                     if (eff.type === 'shoryuken') {
                         const sImg = assets.getImage('shoryuken1');
-                        if (sImg) this.ctx.drawImage(sImg, ex - sImg.width / 2, eff.y - sImg.height);
+                        if (sImg) this.ctx.drawImage(sImg, ex - sImg.width / 2, ey - sImg.height);
                     } else if (eff.type === 'aed_zap') {
                         const zImg = assets.getImage('aed_zap');
-                        if (zImg) this.ctx.drawImage(zImg, ex - zImg.width / 2, eff.y - zImg.height / 2);
+                        if (zImg) this.ctx.drawImage(zImg, ex - zImg.width / 2, ey - zImg.height / 2);
+                    } else if (eff.type === 'misha_drill') {
+                        const dImg = assets.getImage('misha_drill1');
+                        if (dImg) this.ctx.drawImage(dImg, ex - dImg.width / 2, ey - dImg.height / 2);
                     }
                 });
 
-                // 7. HISAO PLAYER SPRITE & SHADOW
+                // 7. HISAO PLAYER SPRITE & GROUND SHADOW
                 const hScreenX = this.hisao.x - this.cameraX;
+                const hScreenY = this.hisao.y - camOffsetY;
                 const hisaoImg = assets.getImage('hisao');
 
                 // Ground Shadow under Hisao
-                const shadowScale = Math.max(0.2, 1 - (320 - this.hisao.y) / 300);
-                this.ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
+                const shadowScale = Math.max(0.2, 1 - (320 - this.hisao.y) / 320);
+                this.ctx.fillStyle = 'rgba(0, 0, 0, 0.38)';
                 this.ctx.beginPath();
-                this.ctx.ellipse(hScreenX, 322, 18 * shadowScale, 6 * shadowScale, 0, 0, Math.PI * 2);
+                this.ctx.ellipse(hScreenX, groundY + 2, 20 * shadowScale, 6 * shadowScale, 0, 0, Math.PI * 2);
                 this.ctx.fill();
 
                 // Draw Rotated Hisao Sprite
                 this.ctx.save();
-                this.ctx.translate(hScreenX, this.hisao.y);
+                this.ctx.translate(hScreenX, hScreenY);
                 this.ctx.rotate(this.hisao.rot);
 
                 if (hisaoImg) {
@@ -969,7 +1037,7 @@
                     this.ctx.fillStyle = p.color;
                     this.ctx.globalAlpha = p.alpha;
                     this.ctx.beginPath();
-                    this.ctx.arc(p.x - this.cameraX, p.y, p.size, 0, Math.PI * 2);
+                    this.ctx.arc(p.x - this.cameraX, p.y - camOffsetY, p.size, 0, Math.PI * 2);
                     this.ctx.fill();
                 });
                 this.ctx.globalAlpha = 1.0;
@@ -977,18 +1045,21 @@
                 this.popups.forEach(p => {
                     this.ctx.fillStyle = p.color;
                     this.ctx.globalAlpha = p.alpha;
-                    this.ctx.font = 'bold 14px "Outfit"';
+                    this.ctx.font = '800 14px "Outfit"';
                     this.ctx.textAlign = 'center';
-                    this.ctx.fillText(p.text, p.x - this.cameraX, p.y);
+                    this.ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
+                    this.ctx.shadowBlur = 4;
+                    this.ctx.fillText(p.text, p.x - this.cameraX, p.y - camOffsetY);
+                    this.ctx.shadowBlur = 0;
                 });
                 this.ctx.globalAlpha = 1.0;
 
                 // 9. LAUNCH SETUP GAUGE (ANGLE & POWER)
                 if (this.state === STATE_ANGLE || this.state === STATE_POWER) {
                     const lx = 80 - this.cameraX;
-                    const ly = 310;
+                    const ly = groundY - 10;
 
-                    // Rotating Arrow Sprite or Line
+                    // Rotating Arrow Sprite
                     const arrowImg = assets.getImage('arrow1');
                     const rad = (this.angle * Math.PI) / 180;
                     this.ctx.save();
@@ -1024,49 +1095,50 @@
 
                 // 10. GAME OVER REPORT CARD MODAL
                 if (this.state === STATE_GAMEOVER) {
-                    this.ctx.fillStyle = 'rgba(8, 10, 18, 0.88)';
-                    this.ctx.fillRect(140, 60, 420, 280);
+                    this.ctx.fillStyle = 'rgba(6, 8, 16, 0.92)';
+                    this.ctx.fillRect(140, 50, 420, 300);
                     this.ctx.strokeStyle = 'rgba(255,255,255,0.25)';
                     this.ctx.lineWidth = 2;
-                    this.ctx.strokeRect(140, 60, 420, 280);
+                    this.ctx.strokeRect(140, 50, 420, 300);
 
                     this.ctx.fillStyle = '#f7b731';
                     this.ctx.font = '800 24px "Outfit"';
                     this.ctx.textAlign = 'center';
-                    this.ctx.fillText('📋 REPORT CARD', 350, 100);
+                    this.ctx.fillText('📋 REPORT CARD', 350, 90);
 
                     // Rank calculation
                     let rank = 'C';
-                    if (this.distance > 1200) rank = 'RANK S (LEGENDARY)';
-                    else if (this.distance > 800) rank = 'RANK A (EXCELLENT)';
-                    else if (this.distance > 500) rank = 'RANK B (GREAT)';
-                    else if (this.distance > 250) rank = 'RANK C (GOOD)';
+                    if (this.distance > 1500) rank = 'RANK S (LEGENDARY)';
+                    else if (this.distance > 1000) rank = 'RANK A (EXCELLENT)';
+                    else if (this.distance > 600) rank = 'RANK B (GREAT)';
+                    else if (this.distance > 300) rank = 'RANK C (GOOD)';
                     else rank = 'RANK D (TRY AGAIN)';
 
                     this.ctx.fillStyle = '#ffffff';
                     this.ctx.font = '14px "JetBrains Mono"';
-                    this.ctx.fillText(`Total Distance: ${this.distance.toFixed(2)} m`, 350, 145);
-                    this.ctx.fillText(`Max Altitude: ${this.maxAltitude.toFixed(2)} m`, 350, 175);
-                    this.ctx.fillText(`Top Speed: ${this.topSpeed.toFixed(1)} km/h`, 350, 205);
-                    this.ctx.fillText(`Combos Struck: ${this.combos}`, 350, 235);
+                    this.ctx.fillText(`Total Distance: ${this.distance.toFixed(2)} m`, 350, 135);
+                    this.ctx.fillText(`Max Altitude: ${this.maxAltitude.toFixed(2)} m`, 350, 165);
+                    this.ctx.fillText(`Top Speed: ${this.topSpeed.toFixed(1)} km/h`, 350, 195);
+                    this.ctx.fillText(`Combos Struck: ${this.combos}`, 350, 225);
+                    this.ctx.fillText(`Peak Multiplier: ${this.comboMultiplier}x`, 350, 255);
 
                     this.ctx.fillStyle = '#20bf6b';
                     this.ctx.font = 'bold 16px "Outfit"';
-                    this.ctx.fillText(`GRADE: ${rank}`, 350, 270);
+                    this.ctx.fillText(`GRADE: ${rank}`, 350, 290);
 
                     this.ctx.fillStyle = '#8e94a5';
                     this.ctx.font = '12px "Outfit"';
-                    this.ctx.fillText('Press SPACEBAR or click Play Again to launch again!', 350, 315);
+                    this.ctx.fillText('Press SPACEBAR or click Play Again to launch again!', 350, 330);
                 }
 
                 // 11. MAIN MENU OVERLAY
                 if (this.state === STATE_MENU) {
-                    this.ctx.fillStyle = 'rgba(8, 10, 18, 0.78)';
+                    this.ctx.fillStyle = 'rgba(6, 8, 16, 0.82)';
                     this.ctx.fillRect(0, 0, 700, 400);
 
                     const logoImg = assets.getImage('logo');
                     if (logoImg) {
-                        this.ctx.drawImage(logoImg, 350 - logoImg.width / 2, 100);
+                        this.ctx.drawImage(logoImg, 350 - logoImg.width / 2, 95);
                     } else {
                         this.ctx.fillStyle = '#ffffff';
                         this.ctx.font = '800 34px "Outfit"';
@@ -1077,8 +1149,8 @@
                     this.ctx.fillStyle = '#8e94a5';
                     this.ctx.font = '14px "Outfit"';
                     this.ctx.textAlign = 'center';
-                    this.ctx.fillText('Native Flash HTML5 Engine &bull; ActionScript 3 Physics', 350, 230);
-                    this.ctx.fillText('Press Launch Game or SPACEBAR to Begin', 350, 275);
+                    this.ctx.fillText('Native Flash HTML5 Engine &bull; ActionScript 3 Physics', 350, 235);
+                    this.ctx.fillText('Press Launch Game or SPACEBAR to Begin', 350, 280);
                 }
 
                 this.ctx.restore();
