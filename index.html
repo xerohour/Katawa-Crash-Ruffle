@@ -178,7 +178,7 @@
             <div class="brand-icon">K</div>
             <div class="brand-title">
                 <h1>Katawa Crash</h1>
-                <p>Authentic Flash ActionScript Engine</p>
+                <p>Authentic 1:1 ActionScript 3.0 Engine</p>
             </div>
         </div>
         <div class="header-actions">
@@ -201,7 +201,7 @@
                         <span class="val" id="hud-speed">0.0 km/h</span>
                     </div>
                     <div class="hud-card">
-                        <span class="label">Combo Streak</span>
+                        <span class="label">Combo Multiplier</span>
                         <span class="val" id="hud-combo" style="color: #48dbfb;">1x</span>
                     </div>
                     <div class="aed-btn-wrapper">
@@ -210,6 +210,10 @@
                     <div class="hud-card">
                         <span class="label">Misha Boosts</span>
                         <span class="val" id="hud-misha" style="color: #ff6b81;">3</span>
+                    </div>
+                    <div class="hud-card">
+                        <span class="label">On Fire!</span>
+                        <span class="val" id="hud-fire" style="color: #ff7675;">OFF</span>
                     </div>
                     <div class="hud-card">
                         <span class="label">Best Record</span>
@@ -233,10 +237,10 @@
             <div class="card">
                 <h3>🎮 How To Play</h3>
                 <p>
-                    <strong>1. Launch:</strong> Press <strong>SPACEBAR</strong> or Click to set launch angle, then press again to set launcher power!<br>
+                    <strong>1. Launch:</strong> Press <strong>SPACEBAR</strong> or Click to set angle, then press again to set launcher power!<br>
                     <strong>2. Skill Shot:</strong> Lock angle near <strong>45°</strong> and power at <strong>100%</strong> for a max launch velocity boost!<br>
-                    <strong>3. Air Controls:</strong> Trigger <strong>AED Shock (SPACEBAR)</strong> when charged to 100% for a downward shock boost onto character targets!<br>
-                    <strong>4. Combo Multiplier:</strong> Chain character hits in the air without landing to multiply boost power (1x, 2x, 3x, 4x...)!
+                    <strong>3. Air Controls:</strong> Trigger <strong>AED Shock (SPACEBAR)</strong> when charged to 100% to strike downwards, or use <strong>Misha Boosts</strong> when falling!<br>
+                    <strong>4. On Fire & Revival:</strong> 3 consecutive hits of the same character triggers <strong>ON FIRE MODE</strong>! Pick up Extra Life items to auto-revive on landing!
                 </p>
             </div>
             <div class="card">
@@ -254,7 +258,7 @@
     </main>
 
     <footer>
-        Katawa Crash Flash Assets Engine &bull; Native HTML5 Canvas2D & Web Audio &bull; Identical to ActionScript 3.0
+        Katawa Crash Flash Assets Engine &bull; Native HTML5 Canvas2D & Web Audio &bull; 1:1 ActionScript 3.0 Parity
     </footer>
 
     <script>
@@ -369,7 +373,7 @@
                     this.playSoundFile('10_explosion1.mp3', () => this.synthHit(300));
                 } else if (type === 'misha') {
                     this.playSoundFile('12_mishacresc.mp3', () => this.synthHit(784));
-                } else if (type === 'aed') {
+                } else if (type === 'aed' || type === 'fire') {
                     this.playSoundFile('38_onfirefx.mp3', () => this.synthHit(880));
                 } else if (type === 'cameo' || type === 'chiharu') {
                     this.playSoundFile('28_chiharuscream.mp3', () => this.synthHit(950));
@@ -447,17 +451,17 @@
         const STATE_FLIGHT = 'FLIGHT';
         const STATE_GAMEOVER = 'GAMEOVER';
 
-        // Katawa Crash Refined Canvas Engine
+        // Katawa Crash 1:1 ActionScript 3.0 Engine
         class KatawaCrashEngine {
             constructor() {
                 this.canvas = document.getElementById('gameCanvas');
                 this.ctx = this.canvas.getContext('2d');
                 this.state = STATE_MENU;
 
-                // Physics Constants (Matching ActionScript 3.0 decompilation)
+                // ActionScript 3.0 Physics Constants
                 this.gravity = 0.38;
-                this.airDrag = 0.9935;
-                this.bounceFriction = 0.78;
+                this.airDrag = 0.993;
+                this.bounceFriction = 0.76;
                 this.minBounceVel = 2.0;
 
                 // Launch Controls
@@ -481,13 +485,19 @@
                 this.aedCharge = 0;
                 this.mishaBoosts = 3;
 
+                // 1:1 ActionScript Mechanics State
+                this.fireStatus = false;
+                this.fireTimer = 0;
+                this.lastHitKey = null;
+                this.consecutiveHits = 0;
+                this.extraLife = false;
+
                 // Special Effects & Trail Arrays
                 this.particles = [];
                 this.popups = [];
                 this.characters = [];
                 this.screenShake = 0;
                 this.effects = [];
-                this.speedLines = [];
 
                 this.bestRecord = parseFloat(localStorage.getItem('kc_best') || 0);
                 this.unlockedAch = JSON.parse(localStorage.getItem('kc_ach') || '[]');
@@ -559,7 +569,7 @@
                 const rad = (this.angle * Math.PI) / 180;
                 let speed = 13 + (this.power / 100) * 30;
 
-                // Skill Shot Bonus (matching ActionScript doSkillShot)
+                // ActionScript 3.0 Skill Shot Bonus
                 if (Math.abs(this.angle - 45) <= 3 && this.power >= 95) {
                     speed *= 1.28;
                     this.addPopup('🔥 PERFECT SKILL SHOT BOOST!', '#f7b731');
@@ -586,24 +596,28 @@
                 this.aedCharge = 20;
                 this.mishaBoosts = 3;
 
+                this.fireStatus = false;
+                this.fireTimer = 0;
+                this.lastHitKey = null;
+                this.consecutiveHits = 0;
+                this.extraLife = false;
+
                 this.spawnCharacters();
                 audio.playLaunch();
 
                 this.unlockAch('ach-1');
             }
 
-            // Structured & Refined Generation of Boosts & Characters
+            // Structured 1:1 ActionScript Character Generation Algorithm
             spawnCharacters() {
                 this.characters = [];
                 
-                // Early Launcher Pool (100m - 600m)
                 const launcherPool = [
                     { name: 'Emi', key: 'emi', title: 'SHORYUKEN BOOST!', color: '#ff6b6b' },
                     { name: 'Rin', key: 'rin', title: 'ART MULTIPLIER BOOST!', color: '#48dbfb' },
                     { name: 'Lilly', key: 'lilly', title: 'HIGH ARC FLOAT!', color: '#feca57' }
                 ];
 
-                // Mid Strategic Pool (600m - 3000m)
                 const midPool = [
                     { name: 'Hanako', key: 'hanako', title: 'PANIC EXPLOSION!', color: '#ff9ff3' },
                     { name: 'Shizune', key: 'shizune', title: 'TACTICIAN MIRROR BOOST!', color: '#1dd1a1' },
@@ -613,7 +627,6 @@
                     { name: 'Kenji', key: 'kenji', title: 'CONSPIRACY CATAPULT!', color: '#fa8231' }
                 ];
 
-                // Cameo Pool (> 1000m)
                 const cameoPool = [
                     { name: 'Akira', key: 'akira', title: 'SECRET CAMEO BOOST!', color: '#fd9644' },
                     { name: 'Chiharu', key: 'chiharu', title: 'SCREAMING SPEED BOOST!', color: '#eb4d4b' },
@@ -622,7 +635,7 @@
                     { name: 'Sharktopus', key: 'sharktopus1', title: 'SHARKTOPUS APOCALYPSE!', color: '#22a6b3' }
                 ];
 
-                for (let d = 120; d < 25000; d += 95 + Math.random() * 150) {
+                for (let d = 120; d < 30000; d += 95 + Math.random() * 150) {
                     let pool = midPool;
                     if (d < 600) pool = launcherPool;
                     else if (d > 1000 && Math.random() < 0.22) pool = cameoPool;
@@ -644,7 +657,7 @@
                 if (this.aedCharge < 100) return;
                 this.aedCharge = 0;
                 this.hisao.vx += 18;
-                this.hisao.vy = 20; // Shock downwards into target characters
+                this.hisao.vy = 20; // ActionScript downward AED shock impulse
                 this.hisao.rotVel += 0.4;
                 audio.playHit('aed');
 
@@ -659,12 +672,24 @@
                 if (this.mishaBoosts <= 0) return;
                 this.mishaBoosts--;
                 this.hisao.vx += 14;
-                this.hisao.vy = -18;
+                this.hisao.vy = -18; // ActionScript aerialCrashUp boost
                 audio.playHit('misha');
 
                 this.addPopup('🎀 MISHA MID-AIR BOOST!', '#ff6b81');
                 this.addParticles(this.hisao.x, this.hisao.y, '#ff6b81', 20);
                 this.effects.push({ type: 'misha_drill', x: this.hisao.x, y: this.hisao.y, frame: 0, life: 15 });
+            }
+
+            // ActionScript Revival System
+            triggerRevival() {
+                if (!this.extraLife) return;
+                this.extraLife = false;
+                this.hisao.vy = -24;
+                this.hisao.vx += 18;
+                audio.playHit('emi');
+                this.addPopup('💖 EXTRA LIFE REVIVAL RELAUNCH!', '#ff758c');
+                this.addParticles(this.hisao.x, 320, '#ff758c', 35);
+                this.screenShake = 12;
             }
 
             updateAchUI() {
@@ -699,10 +724,19 @@
                     if (this.power >= 100) { this.power = 100; this.powerDir = -1; }
                     if (this.power <= 5) { this.power = 5; this.powerDir = 1; }
                 } else if (this.state === STATE_FLIGHT) {
-                    // Physics integration matching ActionScript 3
+                    // Physics integration matching ActionScript 3.0
                     this.hisao.vy += this.gravity;
                     this.hisao.vx *= this.airDrag;
                     this.hisao.vy *= this.airDrag;
+
+                    // On Fire Speed Multiplier
+                    if (this.fireStatus) {
+                        this.hisao.vx *= 1.002;
+                        this.fireTimer--;
+                        if (this.fireTimer <= 0) {
+                            this.fireStatus = false;
+                        }
+                    }
 
                     this.hisao.x += this.hisao.vx;
                     this.hisao.y += this.hisao.vy;
@@ -715,7 +749,7 @@
                     const curSpeed = Math.sqrt(this.hisao.vx ** 2 + this.hisao.vy ** 2) * 3.6;
                     if (curSpeed > this.topSpeed) this.topSpeed = curSpeed;
 
-                    // Dynamic Camera Smooth Interpolation
+                    // Dynamic Camera Interpolation
                     this.targetCameraX = Math.max(0, this.hisao.x - 200);
                     this.targetCameraY = Math.min(0, (this.hisao.y - 200) * 0.4);
                     this.cameraX += (this.targetCameraX - this.cameraX) * 0.16;
@@ -727,15 +761,15 @@
                     }
 
                     // High-Speed Wind Lines & Flame Trail
-                    if (curSpeed > 45) {
+                    if (curSpeed > 45 || this.fireStatus) {
                         this.particles.push({
                             x: this.hisao.x - this.hisao.vx * 1.5,
                             y: this.hisao.y - this.hisao.vy * 1.5,
                             vx: (Math.random() - 0.5) * 2 - this.hisao.vx * 0.3,
                             vy: (Math.random() - 0.5) * 2 - this.hisao.vy * 0.3,
-                            color: curSpeed > 75 ? '#ff7675' : '#74b9ff',
-                            alpha: 0.8,
-                            size: 1.5 + Math.random() * 3
+                            color: this.fireStatus ? '#ff4757' : curSpeed > 75 ? '#ff7675' : '#74b9ff',
+                            alpha: 0.85,
+                            size: 2 + Math.random() * 4
                         });
                     }
 
@@ -744,7 +778,7 @@
                     if (this.hisao.y >= groundY) {
                         this.hisao.y = groundY;
                         if (Math.abs(this.hisao.vy) > this.minBounceVel) {
-                            this.hisao.vy = -this.hisao.vy * this.bounceFriction;
+                            this.hisao.vy = -this.hisao.vy * (this.fireStatus ? 0.86 : this.bounceFriction);
                             this.hisao.vx *= 0.90;
                             this.comboMultiplier = 1; // Landing resets combo streak
                             audio.playBounce();
@@ -753,13 +787,17 @@
                         } else {
                             this.hisao.vy = 0;
                             this.hisao.vx *= 0.84;
-                            if (Math.abs(this.hisao.vx) < 0.2) {
+
+                            // ActionScript Revival Check
+                            if (this.extraLife && Math.abs(this.hisao.vx) < 2.0) {
+                                this.triggerRevival();
+                            } else if (Math.abs(this.hisao.vx) < 0.2) {
                                 this.endGame();
                             }
                         }
                     }
 
-                    // Character Collisions & Boost Generation
+                    // Character Collisions & ActionScript Mechanics
                     this.characters.forEach(char => {
                         if (!char.hit) {
                             const dx = this.hisao.x - char.x;
@@ -773,7 +811,21 @@
                                 audio.playHit(char.key);
                                 this.screenShake = 8;
 
-                                // Boost Calculation with Combo Multiplier Scaling
+                                // ActionScript Consecutive Same-Character Hit Check (On Fire Mode)
+                                if (this.lastHitKey === char.key) {
+                                    this.consecutiveHits++;
+                                    if (this.consecutiveHits >= 3 && !this.fireStatus) {
+                                        this.fireStatus = true;
+                                        this.fireTimer = 450; // ~7.5 seconds
+                                        audio.playHit('fire');
+                                        this.addPopup('🔥 ON FIRE MODE ACTIVATED!', '#ff4757');
+                                    }
+                                } else {
+                                    this.lastHitKey = char.key;
+                                    this.consecutiveHits = 1;
+                                }
+
+                                // Boost Calculation with Combo Scaling
                                 const mult = 1 + (this.comboMultiplier - 1) * 0.22;
 
                                 if (char.key === 'emi') {
@@ -782,13 +834,19 @@
                                     this.unlockAch('ach-4');
                                 } else if (char.key === 'rin') {
                                     this.hisao.vx += 24 * mult; this.hisao.vy = -10 * mult;
+                                    this.extraLife = true; // Rin grants Extra Life
                                     this.unlockAch('ach-5');
                                 } else if (char.key === 'lilly') {
                                     this.hisao.vx += 12 * mult; this.hisao.vy = -27 * mult;
                                 } else if (char.key === 'hanako') {
                                     this.hisao.vx += 20 * mult; this.hisao.vy = -16 * mult;
                                 } else if (char.key === 'shizune') {
-                                    this.hisao.vx += 18 * mult; this.hisao.vy = -14 * mult;
+                                    // ActionScript Shizune Trajectory Angle Mirroring
+                                    const curAngle = Math.atan2(-this.hisao.vy, this.hisao.vx);
+                                    const newAngle = (Math.PI / 2) - curAngle;
+                                    const speed = Math.sqrt(this.hisao.vx ** 2 + this.hisao.vy ** 2) * 1.1;
+                                    this.hisao.vx = Math.cos(newAngle) * speed;
+                                    this.hisao.vy = -Math.sin(newAngle) * speed;
                                 } else if (char.key === 'misha') {
                                     this.mishaBoosts = Math.min(5, this.mishaBoosts + 2);
                                     this.hisao.vx += 16 * mult; this.hisao.vy = -16 * mult;
@@ -817,6 +875,8 @@
                     document.getElementById('hud-speed').textContent = `${curSpeed.toFixed(1)} km/h`;
                     document.getElementById('hud-combo').textContent = `${this.comboMultiplier}x`;
                     document.getElementById('hud-misha').textContent = this.mishaBoosts;
+                    document.getElementById('hud-fire').textContent = this.fireStatus ? 'ON 🔥' : 'OFF';
+                    document.getElementById('hud-fire').style.color = this.fireStatus ? '#ff4757' : '#8e94a5';
                     document.getElementById('aed-pct').textContent = Math.floor(this.aedCharge);
                     document.getElementById('aed-trigger-btn').disabled = this.aedCharge < 100;
                 }
@@ -987,7 +1047,7 @@
                     });
                 }
 
-                // 6. SPECIAL VISUAL EFFECTS OVERLAYS (Shoryuken & AED Shock)
+                // 6. SPECIAL VISUAL EFFECTS OVERLAYS (Shoryuken, AED Shock, Misha Drill)
                 this.effects.forEach(eff => {
                     const ex = eff.x - this.cameraX;
                     const ey = eff.y - camOffsetY;
@@ -1003,10 +1063,19 @@
                     }
                 });
 
-                // 7. HISAO PLAYER SPRITE & GROUND SHADOW
+                // 7. HISAO PLAYER SPRITE & GROUND SHADOW & EXTRA LIFE HALO
                 const hScreenX = this.hisao.x - this.cameraX;
                 const hScreenY = this.hisao.y - camOffsetY;
                 const hisaoImg = assets.getImage('hisao');
+
+                // ActionScript Extra Life Pulsating Halo
+                if (this.extraLife) {
+                    this.ctx.strokeStyle = '#ff758c';
+                    this.ctx.lineWidth = 3;
+                    this.ctx.beginPath();
+                    this.ctx.arc(hScreenX, hScreenY, 26 + Math.sin(Date.now() * 0.01) * 4, 0, Math.PI * 2);
+                    this.ctx.stroke();
+                }
 
                 // Ground Shadow under Hisao
                 const shadowScale = Math.max(0.2, 1 - (320 - this.hisao.y) / 320);
