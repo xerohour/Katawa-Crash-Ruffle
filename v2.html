@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Katawa Crash - Authentic Flash HTML5 Engine</title>
+    <title>Katawa Crash V2.0 - Remade AS3 Engine</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -78,6 +78,7 @@
             transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 0.4rem;
         }
         .btn-link:hover { background: rgba(255, 255, 255, 0.16); border-color: rgba(255, 255, 255, 0.3); }
+        .btn-link.active { background: var(--accent); border-color: var(--accent); }
 
         main {
             flex: 1; display: flex; flex-direction: column; align-items: center;
@@ -217,14 +218,15 @@
 <body>
     <header>
         <div class="brand">
-            <div class="brand-icon">K</div>
+            <div class="brand-icon">K2</div>
             <div class="brand-title">
-                <h1>Katawa Crash</h1>
-                <p>Authentic 1:1 ActionScript 3.0 Engine</p>
+                <h1>Katawa Crash V2.0</h1>
+                <p>1:1 ActionScript 3.0 Complete Engine Port</p>
             </div>
         </div>
         <div class="header-actions">
-            <a href="v2.html" class="btn-link">🚀 Version 2.0 (AS3 Remake)</a>
+            <a href="index.html" class="btn-link">⚡ Version 1.0</a>
+            <a href="v2.html" class="btn-link active">🚀 Version 2.0 (AS3 Remake)</a>
             <a href="ruffle.html" class="btn-link">🎞 Ruffle Emulator Mode</a>
         </div>
     </header>
@@ -288,12 +290,12 @@
 
         <div class="info-cards">
             <div class="card">
-                <h3>🎮 How To Play</h3>
+                <h3>🎮 How To Play (Version 2.0 Engine)</h3>
                 <p>
                     <strong>1. Launch:</strong> Press <strong>SPACEBAR</strong> or Click to set angle, then press again to set launcher power!<br>
                     <strong>2. Skill Shot:</strong> Lock angle near <strong>45°</strong> and power at <strong>100%</strong> for a max launch velocity boost!<br>
                     <strong>3. Air Controls:</strong> Trigger <strong>AED Shock (SPACEBAR)</strong> when charged to 100% to strike downwards, or use <strong>Misha Boosts</strong> when falling!<br>
-                    <strong>4. Procedural Boosts:</strong> Infinite procedurally generated character clusters, speed cannons, extra lives, and cameos stream continuously ahead!
+                    <strong>4. Complete Character Cast:</strong> Encounter Emi, Rin, Lilly, Hanako, Shizune, Misha, Mutou, Nurse, Kenji, Yuuko, Akira, Chiharu, Kubo, Natsume & Sharktopus!
                 </p>
             </div>
             <div class="card">
@@ -311,10 +313,10 @@
     </main>
 
     <footer>
-        Katawa Crash Flash Assets Engine &bull; Native HTML5 Canvas2D & Web Audio &bull; 1:1 ActionScript 3.0 Parity
+        Katawa Crash V2.0 Remake Engine &bull; Native HTML5 Canvas2D & Web Audio &bull; Complete AS3 Source Code Parity
     </footer>
 
-    <!-- ponytail: reference external game.js for engine logic -->
-    <script src="game.js" defer></script>
+    <!-- ponytail: reference external v2_game.js for engine logic -->
+    <script src="v2_game.js" defer></script>
 </body>
 </html>
