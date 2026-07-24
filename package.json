@@ -7,7 +7,16 @@
   "scripts": {
     "start": "node server.mjs"
   },
-  "keywords": ["flash", "ruffle", "katawa-crash", "actionscript3", "emulation"],
+  "keywords": [
+    "flash",
+    "ruffle",
+    "katawa-crash",
+    "actionscript3",
+    "emulation"
+  ],
   "author": "Antigravity",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "playwright": "^1.61.1"
+  }
 }

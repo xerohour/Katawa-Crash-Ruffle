@@ -56,7 +56,8 @@ class V2AssetManager {
             help_bg: 'assets/images/help_bg.jpg',
             arrow1: 'assets/images/arrow1.png',
             arrow2: 'assets/images/arrow2.png',
-            logo: 'assets/images/logo.png'
+            logo: 'assets/images/logo.png',
+            snow_bg: 'assets/images/snow_bg.jpg'
         };
 
         for (const [key, src] of Object.entries(imgMap)) {
@@ -986,29 +987,43 @@ class KatawaCrashV2Engine {
         }
 
         if (this.state === V2_STATE_MENU) {
-            const startBg = v2Assets.getImage('starting_bg');
-            if (startBg) {
-                this.ctx.drawImage(startBg, 0, 185);
-            }
-            const grassTile = v2Assets.getImage('grass_tile');
-            if (grassTile) {
-                for (let x = 0; x < 700; x += grassTile.width) {
-                    this.ctx.drawImage(grassTile, x, 320);
-                }
-            }
-
-            this.ctx.fillStyle = 'rgba(6, 8, 16, 0.45)';
-            this.ctx.fillRect(0, 0, 700, 400);
-
-            const logoImg = v2Assets.getImage('logo');
-            if (logoImg) {
-                this.ctx.drawImage(logoImg, 350 - logoImg.width / 2, 45);
+            const snowBg = v2Assets.getImage('snow_bg');
+            if (snowBg) {
+                this.ctx.drawImage(snowBg, 0, 0, 700, 400);
             } else {
-                this.ctx.fillStyle = '#ffffff';
-                this.ctx.font = '800 36px "Outfit"';
-                this.ctx.textAlign = 'center';
-                this.ctx.fillText('KATAWA CRASH V2', 350, 90);
+                this.ctx.fillStyle = '#eef2f7';
+                this.ctx.fillRect(0, 0, 700, 400);
             }
+
+            // Authentic SWF bottom right credits box
+            const bx = 550, by = 295, bw = 145, bh = 100;
+            this.ctx.fillStyle = '#ffffff';
+            this.ctx.fillRect(bx, by, bw, bh);
+            this.ctx.strokeStyle = '#000000';
+            this.ctx.lineWidth = 1;
+            this.ctx.strokeRect(bx, by, bw, bh);
+
+            this.ctx.fillStyle = '#000000';
+            this.ctx.font = '700 8px "Press Start 2P", monospace';
+            this.ctx.textAlign = 'left';
+            this.ctx.fillText('KATAWA CRASH', bx + 5, by + 12);
+
+            this.ctx.font = '9px sans-serif';
+            const lines = [
+                'a Flash game by brent',
+                'Thx to 4LS, Doomfest,',
+                'nicol, SZS, #k-s, DJ',
+                'Fresh, and whoever',
+                'made Nanaca Crash',
+                'twitter: @KatawaCrash'
+            ];
+            lines.forEach((line, idx) => {
+                this.ctx.fillStyle = '#000000';
+                this.ctx.fillText(line, bx + 5, by + 24 + idx * 11);
+            });
+
+            this.ctx.fillStyle = '#008800';
+            this.ctx.fillText('!HaoVsu9Sz6', bx + 5, by + 24 + lines.length * 11);
         }
 
         this.ctx.restore();
