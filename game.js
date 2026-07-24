@@ -697,6 +697,11 @@ class KatawaCrashEngine {
         const starfieldBg = assets.getImage('starfield');
         const bigEarthBg = assets.getImage('big_earth');
         const planetEarthBg = assets.getImage('planet_earth');
+        const fBg1 = assets.getImage('field_bg1');
+        const fBg2 = assets.getImage('field_bg2');
+        const fBg3 = assets.getImage('field_bg3');
+        const cloud1 = assets.getImage('cloud1');
+        const cloud2 = assets.getImage('cloud2');
 
         if (altitude > 250 && starfieldBg) {
             this.ctx.drawImage(starfieldBg, 0, 0, 700, 400);
@@ -714,9 +719,6 @@ class KatawaCrashEngine {
                 this.ctx.fillRect(0, 0, 700, 320);
             }
 
-            const fBg1 = assets.getImage('field_bg1');
-            const fBg2 = assets.getImage('field_bg2');
-            const fBg3 = assets.getImage('field_bg3');
             if (fBg1 && fBg2 && fBg3) {
                 const hillWidth = 691;
                 const scrollX = (this.cameraX * 0.65);
@@ -729,8 +731,6 @@ class KatawaCrashEngine {
                 }
             }
 
-            const cloud1 = assets.getImage('cloud1');
-            const cloud2 = assets.getImage('cloud2');
             if (cloud1) {
                 const c1X = 600 - (this.cameraX * 0.15) % 900;
                 this.ctx.drawImage(cloud1, c1X, 40 - camOffsetY * 0.2);
