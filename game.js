@@ -1,5 +1,5 @@
 // ponytail: game.js - modular port of ActionScript 3 physics and character mechanics.
-// Standard HTML5 canvas and Web Audio.
+// Standard HTML5 canvas, Web Audio, and parallax backgrounds.
 
 class AssetManager {
     constructor() {
@@ -74,7 +74,9 @@ class SoundEngine {
     constructor() {
         this.ctx = null;
         this.enabled = true;
+        this.bgmEnabled = true;
         this.audioCache = {};
+        this.bgm = null;
     }
 
     init() {
@@ -125,6 +127,41 @@ class SoundEngine {
 
     playAch() {
         this.playSoundFile('35_goldbgm.mp3', () => this.synthAch());
+    }
+
+    playBGM() {
+        if (!this.bgmEnabled || !this.enabled) return;
+        try {
+            if (!this.bgm) {
+                this.bgm = new Audio('assets/audio/59_rumbabg.mp3');
+                this.bgm.loop = true;
+                this.bgm.volume = 0.55;
+            }
+            this.bgm.play().catch(() => {});
+        } catch (e) {
+            console.warn('BGM error:', e);
+        }
+    }
+
+    stopBGM() {
+        if (this.bgm) {
+            this.bgm.pause();
+        }
+    }
+
+    toggleBGM() {
+        this.bgmEnabled = !this.bgmEnabled;
+        if (!this.bgmEnabled) {
+            this.stopBGM();
+        } else {
+            this.playBGM();
+        }
+        return this.bgmEnabled;
+    }
+
+    toggleSFX() {
+        this.enabled = !this.enabled;
+        return this.enabled;
     }
 
     synthLaunch() {
@@ -240,6 +277,7 @@ class KatawaCrashEngine {
 
         this.initDOM();
         this.updateAchUI();
+        this.updateMenuOverlayState();
         requestAnimationFrame(() => this.loop());
     }
 
@@ -253,6 +291,7 @@ class KatawaCrashEngine {
 
         const handleAction = () => {
             audio.init();
+            audio.playBGM();
             if (this.state === STATE_MENU || this.state === STATE_GAMEOVER) {
                 this.startAnglePhase();
             } else if (this.state === STATE_ANGLE) {
@@ -269,6 +308,7 @@ class KatawaCrashEngine {
             }
         };
 
+        // DOM controls
         mainBtn.addEventListener('click', handleAction);
         aedBtn.addEventListener('click', () => {
             audio.init();
@@ -279,6 +319,34 @@ class KatawaCrashEngine {
         sndBtn.addEventListener('click', () => {
             audio.enabled = !audio.enabled;
             sndBtn.textContent = audio.enabled ? '🔊 Sound: ON' : '🔇 Sound: OFF';
+            const sfxEl = document.getElementById('menu-sfx');
+            if (sfxEl) sfxEl.textContent = audio.enabled ? 'Sfx: ON' : 'Sfx: OFF';
+        });
+
+        // Overlay menu controls
+        document.getElementById('menu-start').addEventListener('click', () => handleAction());
+        document.getElementById('menu-how').addEventListener('click', () => {
+            document.querySelector('.card').scrollIntoView({ behavior: 'smooth' });
+        });
+        document.getElementById('menu-ach').addEventListener('click', () => {
+            document.getElementById('ach-container').scrollIntoView({ behavior: 'smooth' });
+        });
+        document.getElementById('menu-dev').addEventListener('click', () => {
+            window.open('https://github.com/xerohour/Katawa-Crash-Ruffle', '_blank');
+        });
+        document.getElementById('menu-bgm').addEventListener('click', (e) => {
+            audio.init();
+            const active = audio.toggleBGM();
+            e.target.textContent = active ? 'Bgm: ON' : 'Bgm: OFF';
+        });
+        document.getElementById('menu-sfx').addEventListener('click', (e) => {
+            audio.init();
+            const active = audio.toggleSFX();
+            e.target.textContent = active ? 'Sfx: ON' : 'Sfx: OFF';
+            sndBtn.textContent = active ? '🔊 Sound: ON' : '🔇 Sound: OFF';
+        });
+        document.getElementById('menu-url').addEventListener('click', () => {
+            window.open('http://www.katawa-shoujo.com', '_blank');
         });
 
         window.addEventListener('keydown', (e) => {
@@ -289,18 +357,27 @@ class KatawaCrashEngine {
         });
     }
 
+    updateMenuOverlayState() {
+        const overlay = document.getElementById('menu-overlay');
+        if (overlay) {
+            overlay.style.display = (this.state === STATE_MENU) ? 'flex' : 'none';
+        }
+    }
+
     startAnglePhase() {
         this.state = STATE_ANGLE;
         this.angle = 45;
         this.power = 50;
         document.getElementById('btn-main-action').textContent = '🎯 Lock Angle';
         document.getElementById('hud-overlay').style.display = 'none';
+        this.updateMenuOverlayState();
     }
 
     launch() {
         this.state = STATE_FLIGHT;
         document.getElementById('btn-main-action').textContent = '⚡ In Flight...';
         document.getElementById('hud-overlay').style.display = 'flex';
+        this.updateMenuOverlayState();
 
         const rad = (this.angle * Math.PI) / 180;
         let speed = 13 + (this.power / 100) * 30;
@@ -448,6 +525,7 @@ class KatawaCrashEngine {
         this.state = STATE_MENU;
         document.getElementById('btn-main-action').textContent = '🚀 Launch Game';
         document.getElementById('hud-overlay').style.display = 'none';
+        this.updateMenuOverlayState();
     }
 
     update() {
@@ -625,6 +703,7 @@ class KatawaCrashEngine {
     endGame() {
         this.state = STATE_GAMEOVER;
         document.getElementById('btn-main-action').textContent = '🔁 Play Again';
+        this.updateMenuOverlayState();
 
         if (this.distance > this.bestRecord) {
             this.bestRecord = this.distance;
@@ -689,6 +768,22 @@ class KatawaCrashEngine {
                 this.ctx.fillRect(0, 0, 700, 320);
             }
 
+            // Draw scrolling field/hills parallax layer
+            const fBg1 = assets.getImage('field_bg1');
+            const fBg2 = assets.getImage('field_bg2');
+            const fBg3 = assets.getImage('field_bg3');
+            if (fBg1 && fBg2 && fBg3) {
+                const hillWidth = 691;
+                const scrollX = (this.cameraX * 0.65);
+                const startIndex = Math.floor(scrollX / hillWidth);
+                const endIndex = startIndex + 2;
+                for (let i = startIndex; i <= endIndex; i++) {
+                    const hillImg = (i % 3 === 0) ? fBg1 : (i % 3 === 1) ? fBg2 : fBg3;
+                    const hx = i * hillWidth - scrollX;
+                    this.ctx.drawImage(hillImg, hx, 185 - camOffsetY * 0.5);
+                }
+            }
+
             const cloud1 = assets.getImage('cloud1');
             const cloud2 = assets.getImage('cloud2');
             if (cloud1) {
@@ -711,14 +806,14 @@ class KatawaCrashEngine {
         if (skyline2) {
             const s2X = (this.cameraX * 0.25) % skyline2.width;
             for (let x = -s2X; x < 700; x += skyline2.width) {
-                this.ctx.drawImage(skyline2, x, 175 - camOffsetY);
+                this.ctx.drawImage(skyline2, x, 175 - camOffsetY * 0.3);
             }
         }
 
         if (skyline1) {
             const s1X = (this.cameraX * 0.45) % skyline1.width;
             for (let x = -s1X; x < 700; x += skyline1.width) {
-                this.ctx.drawImage(skyline1, x, 190 - camOffsetY);
+                this.ctx.drawImage(skyline1, x, 190 - camOffsetY * 0.35);
             }
         }
 
@@ -934,24 +1029,18 @@ class KatawaCrashEngine {
                 }
             }
 
-            this.ctx.fillStyle = 'rgba(6, 8, 16, 0.78)';
+            this.ctx.fillStyle = 'rgba(6, 8, 16, 0.45)'; // lighter overlay for better graphics visibility
             this.ctx.fillRect(0, 0, 700, 400);
 
             const logoImg = assets.getImage('logo');
             if (logoImg) {
-                this.ctx.drawImage(logoImg, 350 - logoImg.width / 2, 85);
+                this.ctx.drawImage(logoImg, 350 - logoImg.width / 2, 45);
             } else {
                 this.ctx.fillStyle = '#ffffff';
                 this.ctx.font = '800 36px "Outfit"';
                 this.ctx.textAlign = 'center';
-                this.ctx.fillText('KATAWA CRASH', 350, 130);
+                this.ctx.fillText('KATAWA CRASH', 350, 90);
             }
-
-            this.ctx.fillStyle = '#8e94a5';
-            this.ctx.font = '14px "Outfit"';
-            this.ctx.textAlign = 'center';
-            this.ctx.fillText('Native Flash HTML5 Engine \u2022 ActionScript 3 Physics', 350, 235);
-            this.ctx.fillText('Press Launch Game or SPACEBAR to Begin', 350, 280);
         }
 
         this.ctx.restore();

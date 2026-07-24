@@ -8,6 +8,15 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
+        @font-face {
+            font-family: 'CatholicSchoolGirls BB';
+            src: url('Fonts/2_csgbb_CatholicSchoolGirls BB.ttf') format('truetype');
+        }
+        @font-face {
+            font-family: 'Press Start 2P';
+            src: url('Fonts/3_ninfont_Press Start 2P.ttf') format('truetype');
+        }
+
         :root {
             --bg-color: #06080f;
             --panel-bg: rgba(16, 20, 32, 0.94);
@@ -92,6 +101,7 @@
             aspect-ratio: 700 / 400;
             background: #060912;
             overflow: hidden;
+            container-type: size;
         }
 
         canvas {
@@ -131,6 +141,38 @@
         }
         #aed-trigger-btn:hover { transform: scale(1.05); background: linear-gradient(135deg, #00cec9, #55efc4); }
         #aed-trigger-btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; box-shadow: none; filter: grayscale(0.8); }
+
+        /* Authentic Flash Menu Overlay */
+        .menu-overlay {
+            position: absolute;
+            left: 1.4cqw;
+            top: 45cqh;
+            display: flex;
+            flex-direction: column;
+            gap: 1cqh;
+            pointer-events: auto;
+            z-index: 15;
+            font-family: 'CatholicSchoolGirls BB', 'Franklin Gothic Medium', sans-serif;
+        }
+        .menu-item {
+            font-size: 4.8cqh;
+            color: #3b0906;
+            cursor: pointer;
+            padding: 0.2cqh 1.2cqw;
+            border-radius: 0.8cqh;
+            transition: all 0.15s ease;
+            text-shadow: 0 0 2px rgba(255,255,255,0.7);
+            background: transparent;
+            user-select: none;
+            width: fit-content;
+            font-weight: bold;
+        }
+        .menu-item:hover {
+            background-color: rgba(0, 206, 201, 0.75);
+            color: #ffffff;
+            text-shadow: none;
+            box-shadow: 0 0 10px rgba(0, 206, 201, 0.45);
+        }
 
         .game-controls {
             padding: 0.9rem 1.4rem;
@@ -191,6 +233,16 @@
             <div class="canvas-container">
                 <canvas id="gameCanvas" width="700" height="400"></canvas>
                 
+                <div class="menu-overlay" id="menu-overlay" style="display: none;">
+                    <div class="menu-item" id="menu-start">Start game</div>
+                    <div class="menu-item" id="menu-how">How to play</div>
+                    <div class="menu-item" id="menu-ach">Achievements</div>
+                    <div class="menu-item" id="menu-dev">Dev thread</div>
+                    <div class="menu-item" id="menu-bgm">Bgm: ON</div>
+                    <div class="menu-item" id="menu-sfx">Sfx: ON</div>
+                    <div class="menu-item" id="menu-url">katawa-shoujo.com</div>
+                </div>
+
                 <div class="hud-overlay" id="hud-overlay" style="display: none;">
                     <div class="hud-card">
                         <span class="label">Distance</span>
