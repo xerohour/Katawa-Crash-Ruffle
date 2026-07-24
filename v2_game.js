@@ -1077,39 +1077,69 @@ class KatawaCrashV2Engine {
         }
 
         if (this.state === V2_STATE_GAMEOVER) {
-            this.ctx.fillStyle = 'rgba(6, 8, 16, 0.92)';
-            this.ctx.fillRect(140, 50, 420, 300);
-            this.ctx.strokeStyle = 'rgba(255,255,255,0.25)';
-            this.ctx.lineWidth = 2;
-            this.ctx.strokeRect(140, 50, 420, 300);
-
-            this.ctx.fillStyle = '#f7b731';
-            this.ctx.font = '800 24px "Outfit"';
-            this.ctx.textAlign = 'center';
-            this.ctx.fillText('📋 REPORT CARD (V2.0)', 350, 90);
-
-            let rank = 'C';
-            if (this.distance > 1500) rank = 'RANK S (LEGENDARY)';
-            else if (this.distance > 1000) rank = 'RANK A (EXCELLENT)';
-            else if (this.distance > 600) rank = 'RANK B (GREAT)';
-            else if (this.distance > 300) rank = 'RANK C (GOOD)';
-            else rank = 'RANK D (TRY AGAIN)';
-
+            // Authentic Flash YAMAKU H.S. BALLISTICS CLUB Summary Modal
+            const bx = 100, by = 25, bw = 500, bh = 340;
             this.ctx.fillStyle = '#ffffff';
-            this.ctx.font = '14px "JetBrains Mono"';
-            this.ctx.fillText(`Total Distance: ${this.distance.toFixed(2)} m`, 350, 135);
-            this.ctx.fillText(`Max Altitude: ${this.maxAltitude.toFixed(2)} m`, 350, 165);
-            this.ctx.fillText(`Top Speed: ${this.topSpeed.toFixed(1)} km/h`, 350, 195);
-            this.ctx.fillText(`Combos Struck: ${this.combos}`, 350, 225);
-            this.ctx.fillText(`Peak Multiplier: ${this.comboMultiplier}x`, 350, 255);
+            this.ctx.fillRect(bx, by, bw, bh);
+            this.ctx.strokeStyle = '#000000';
+            this.ctx.lineWidth = 2;
+            this.ctx.strokeRect(bx, by, bw, bh);
 
-            this.ctx.fillStyle = '#20bf6b';
-            this.ctx.font = 'bold 16px "Outfit"';
-            this.ctx.fillText(`GRADE: ${rank}`, 350, 290);
+            // Header Title
+            this.ctx.fillStyle = '#000000';
+            this.ctx.font = '700 22px "Outfit", sans-serif';
+            this.ctx.textAlign = 'center';
+            this.ctx.fillText('YAMAKU H.S. BALLISTICS CLUB', 350, by + 38);
 
-            this.ctx.fillStyle = '#8e94a5';
-            this.ctx.font = '12px "Outfit"';
-            this.ctx.fillText('Press SPACEBAR or click Play Again to launch again!', 350, 330);
+            // Underline
+            this.ctx.fillRect(bx + 15, by + 48, bw - 30, 2);
+
+            // Rows
+            const rows = [
+                { label: 'Total Distance:', mid: 'Maximum', val: (this.distance * 10).toFixed(2) },
+                { label: 'Height:', mid: 'Maximum', val: (this.maxAltitude * 10).toFixed(2) },
+                { label: 'Speed:', mid: 'Objects', val: (this.topSpeed / 3.6 * 3).toFixed(2) },
+                { label: 'Struck:', mid: 'Special', val: `${this.combos}` },
+                { label: 'Events:', mid: 'Authentication', val: '0' }
+            ];
+
+            rows.forEach((r, idx) => {
+                const ry = by + 88 + idx * 30;
+                this.ctx.font = '700 16px "Outfit", sans-serif';
+
+                this.ctx.fillStyle = '#000000';
+                this.ctx.textAlign = 'right';
+                this.ctx.fillText(r.label, 260, ry);
+
+                this.ctx.textAlign = 'left';
+                this.ctx.fillText(r.mid, 275, ry);
+
+                this.ctx.fillStyle = '#800000';
+                this.ctx.fillText(r.val, 400, ry);
+            });
+
+            // Main Menu Button
+            const btnX = 220, btnY = by + 248, btnW = 260, btnH = 42;
+            const grad = this.ctx.createLinearGradient(btnX, btnY, btnX, btnY + btnH);
+            grad.addColorStop(0, '#00e5ff');
+            grad.addColorStop(1, '#00b4d8');
+            this.ctx.fillStyle = grad;
+
+            this.ctx.beginPath();
+            if (this.ctx.roundRect) {
+                this.ctx.roundRect(btnX, btnY, btnW, btnH, 12);
+            } else {
+                this.ctx.rect(btnX, btnY, btnW, btnH);
+            }
+            this.ctx.fill();
+            this.ctx.strokeStyle = '#0088cc';
+            this.ctx.lineWidth = 2;
+            this.ctx.stroke();
+
+            this.ctx.fillStyle = '#0000ff';
+            this.ctx.font = '700 18px "Outfit", sans-serif';
+            this.ctx.textAlign = 'center';
+            this.ctx.fillText('Main menu', 350, btnY + 27);
         }
 
         if (this.state === V2_STATE_MENU) {
