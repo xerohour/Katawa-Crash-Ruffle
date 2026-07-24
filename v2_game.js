@@ -925,29 +925,31 @@ class KatawaCrashV2Engine {
             this.ctx.translate(lx, ly);
             this.ctx.rotate(-rad);
             if (arrowImg) {
-                this.ctx.drawImage(arrowImg, 0, -arrowImg.height / 2, 60, arrowImg.height);
+                this.ctx.drawImage(arrowImg, 0, -arrowImg.height / 2, 65, arrowImg.height * 1.2);
             } else {
-                this.ctx.strokeStyle = '#00d2d3';
-                this.ctx.lineWidth = 5;
+                this.ctx.strokeStyle = '#e94560';
+                this.ctx.lineWidth = 6;
                 this.ctx.beginPath();
                 this.ctx.moveTo(0, 0);
-                this.ctx.lineTo(60, 0);
+                this.ctx.lineTo(65, 0);
                 this.ctx.stroke();
             }
             this.ctx.restore();
 
-            this.ctx.fillStyle = '#00d2d3';
-            this.ctx.font = 'bold 14px "JetBrains Mono"';
-            this.ctx.fillText(`ANGLE: ${Math.floor(this.angle)}°`, lx + 70, ly - 35);
+            // Notebook paper entries in CatholicSchoolGirls BB font
+            this.ctx.fillStyle = '#3b0906';
+            this.ctx.font = '700 24px "CatholicSchoolGirls BB", sans-serif';
+            this.ctx.textAlign = 'left';
+            this.ctx.fillText(`${Math.floor(this.angle)}°`, 215 - this.cameraX, 246);
 
             if (this.state === V2_STATE_POWER) {
-                this.ctx.fillStyle = 'rgba(0,0,0,0.65)';
-                this.ctx.fillRect(lx + 70, ly - 18, 120, 16);
+                this.ctx.fillText(`${Math.floor(this.power)}%`, 515 - this.cameraX, 246);
+
+                // Animated Power Gauge Bar
+                this.ctx.fillStyle = 'rgba(0,0,0,0.75)';
+                this.ctx.fillRect(450 - this.cameraX, 215, 120, 14);
                 this.ctx.fillStyle = '#e94560';
-                this.ctx.fillRect(lx + 72, ly - 16, (this.power / 100) * 116, 12);
-                this.ctx.fillStyle = '#ffffff';
-                this.ctx.font = 'bold 11px "JetBrains Mono"';
-                this.ctx.fillText(`POWER: ${Math.floor(this.power)}%`, lx + 70, ly + 14);
+                this.ctx.fillRect(452 - this.cameraX, 217, (this.power / 100) * 116, 10);
             }
         }
 
