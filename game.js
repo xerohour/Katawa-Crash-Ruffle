@@ -1,10 +1,8 @@
-// ponytail: game.js - modular port of ActionScript 3 physics and character mechanics.
-// Standard HTML5 canvas, Web Audio, and parallax backgrounds.
+// ponytail: game.js - ActionScript 3.0 complete port engine for Katawa Crash V1.
 
 class AssetManager {
     constructor() {
         this.images = {};
-        this.sounds = {};
         this.loaded = 0;
         this.total = 0;
     }
@@ -34,10 +32,13 @@ class AssetManager {
             kubo: 'assets/images/kubo.png',
             chiharu: 'assets/images/chiharu.png',
             natsume: 'assets/images/natsume.png',
+            sharktopus1: 'assets/images/sharktopus1.png',
             shoryuken1: 'assets/images/shoryuken1.png',
             shoryuken2: 'assets/images/shoryuken2.png',
             shoryuken3: 'assets/images/shoryuken3.png',
             aed_zap: 'assets/images/aed_zap.png',
+            misha_drill1: 'assets/images/misha_drill1.png',
+            misha_drill2: 'assets/images/misha_drill2.png',
             starting_bg: 'assets/images/starting_bg.jpg',
             field_bg1: 'assets/images/field_bg1.png',
             field_bg2: 'assets/images/field_bg2.png',
@@ -55,9 +56,7 @@ class AssetManager {
             arrow1: 'assets/images/arrow1.png',
             arrow2: 'assets/images/arrow2.png',
             logo: 'assets/images/logo.png',
-            sharktopus1: 'assets/images/sharktopus1.png',
-            misha_drill1: 'assets/images/misha_drill1.png',
-            misha_drill2: 'assets/images/misha_drill2.png'
+            snow_bg: 'assets/images/snow_bg.jpg'
         };
 
         for (const [key, src] of Object.entries(imgMap)) {
@@ -73,7 +72,7 @@ class AssetManager {
 class SoundEngine {
     constructor() {
         this.ctx = null;
-        this.enabled = true;
+        this.sfxEnabled = true;
         this.bgmEnabled = true;
         this.audioCache = {};
         this.bgm = null;
@@ -85,136 +84,80 @@ class SoundEngine {
         }
     }
 
-    playSoundFile(filename, fallbackSynthFn) {
-        if (!this.enabled) return;
+    playSoundFile(filename, fallbackFreq = 440) {
+        if (!this.sfxEnabled) return;
         try {
             if (!this.audioCache[filename]) {
                 this.audioCache[filename] = new Audio(`assets/audio/${filename}`);
             }
             const sound = this.audioCache[filename].cloneNode();
             sound.volume = 0.75;
-            sound.play().catch(() => { if (fallbackSynthFn) fallbackSynthFn(); });
+            sound.play().catch(() => this.synthHit(fallbackFreq));
         } catch (e) {
-            if (fallbackSynthFn) fallbackSynthFn();
+            this.synthHit(fallbackFreq);
         }
     }
 
-    playLaunch() {
-        this.playSoundFile('11_takeride.mp3', () => this.synthLaunch());
-    }
-
-    playBounce() {
-        this.playSoundFile('65_floorbump.mp3', () => this.synthBounce());
-    }
-
+    playLaunch() { this.playSoundFile('11_takeride.mp3', 300); }
+    playBounce() { this.playSoundFile('65_floorbump.mp3', 180); }
     playHit(type) {
-        if (type === 'emi') {
-            this.playSoundFile('57_shoryuk.mp3', () => this.synthHit(523));
-        } else if (type === 'rin') {
-            this.playSoundFile('26_combofx.mp3', () => this.synthHit(659));
-        } else if (type === 'hanako') {
-            this.playSoundFile('10_explosion1.mp3', () => this.synthHit(300));
-        } else if (type === 'misha') {
-            this.playSoundFile('12_mishacresc.mp3', () => this.synthHit(784));
-        } else if (type === 'aed' || type === 'fire') {
-            this.playSoundFile('38_onfirefx.mp3', () => this.synthHit(880));
-        } else if (type === 'cameo' || type === 'chiharu') {
-            this.playSoundFile('28_chiharuscream.mp3', () => this.synthHit(950));
-        } else {
-            this.playSoundFile('25_shorthit1.mp3', () => this.synthHit(440));
-        }
+        const soundMap = {
+            emi: '57_shoryuk.mp3',
+            rin: '26_combofx.mp3',
+            hanako: '10_explosion1.mp3',
+            misha: '12_mishacresc.mp3',
+            kenji: '16_stompsound.mp3',
+            mutou: '16_stompsound.mp3',
+            nurse: '25_shorthit1.mp3',
+            yuuko: '62_yuukobump.mp3',
+            akira: '63_punch.mp3',
+            chiharu: '28_chiharuscream.mp3',
+            fire: '38_onfirefx.mp3',
+            aed: '38_onfirefx.mp3',
+            stuka: '24_stukafx.mp3',
+            cameo: '28_chiharuscream.mp3'
+        };
+        this.playSoundFile(soundMap[type] || '25_shorthit1.mp3', 440);
     }
-
-    playAch() {
-        this.playSoundFile('35_goldbgm.mp3', () => this.synthAch());
-    }
+    playAch() { this.playSoundFile('35_goldbgm.mp3', 880); }
 
     playBGM() {
-        if (!this.bgmEnabled || !this.enabled) return;
+        if (!this.bgmEnabled) return;
         try {
             if (!this.bgm) {
                 this.bgm = new Audio('assets/audio/59_rumbabg.mp3');
                 this.bgm.loop = true;
-                this.bgm.volume = 0.55;
+                this.bgm.volume = 0.5;
             }
             this.bgm.play().catch(() => {});
-        } catch (e) {
-            console.warn('BGM error:', e);
-        }
+        } catch (e) {}
     }
 
-    stopBGM() {
-        if (this.bgm) {
-            this.bgm.pause();
-        }
-    }
+    stopBGM() { if (this.bgm) this.bgm.pause(); }
 
     toggleBGM() {
         this.bgmEnabled = !this.bgmEnabled;
-        if (!this.bgmEnabled) {
-            this.stopBGM();
-        } else {
-            this.playBGM();
-        }
+        if (!this.bgmEnabled) this.stopBGM();
+        else this.playBGM();
         return this.bgmEnabled;
     }
 
     toggleSFX() {
-        this.enabled = !this.enabled;
-        return this.enabled;
-    }
-
-    synthLaunch() {
-        if (!this.enabled || !this.ctx) return;
-        const osc = this.ctx.createOscillator();
-        const gain = this.ctx.createGain();
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(150, this.ctx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(600, this.ctx.currentTime + 0.3);
-        gain.gain.setValueAtTime(0.4, this.ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.3);
-        osc.connect(gain); gain.connect(this.ctx.destination);
-        osc.start(); osc.stop(this.ctx.currentTime + 0.3);
-    }
-
-    synthBounce() {
-        if (!this.enabled || !this.ctx) return;
-        const osc = this.ctx.createOscillator();
-        const gain = this.ctx.createGain();
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(220, this.ctx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(80, this.ctx.currentTime + 0.15);
-        gain.gain.setValueAtTime(0.5, this.ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.15);
-        osc.connect(gain); gain.connect(this.ctx.destination);
-        osc.start(); osc.stop(this.ctx.currentTime + 0.15);
+        this.sfxEnabled = !this.sfxEnabled;
+        return this.sfxEnabled;
     }
 
     synthHit(freq = 440) {
-        if (!this.enabled || !this.ctx) return;
+        if (!this.sfxEnabled || !this.ctx) return;
         const osc = this.ctx.createOscillator();
         const gain = this.ctx.createGain();
-        osc.type = 'triangle';
+        osc.type = 'sawtooth';
         osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(freq * 2, this.ctx.currentTime + 0.25);
-        gain.gain.setValueAtTime(0.5, this.ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.25);
+        osc.frequency.exponentialRampToValueAtTime(freq * 1.8, this.ctx.currentTime + 0.2);
+        gain.gain.setValueAtTime(0.3, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.2);
         osc.connect(gain); gain.connect(this.ctx.destination);
-        osc.start(); osc.stop(this.ctx.currentTime + 0.25);
-    }
-
-    synthAch() {
-        if (!this.enabled || !this.ctx) return;
-        const now = this.ctx.currentTime;
-        [523.25, 659.25, 783.99, 1046.50].forEach((freq, idx) => {
-            const osc = this.ctx.createOscillator();
-            const gain = this.ctx.createGain();
-            osc.frequency.setValueAtTime(freq, now + idx * 0.08);
-            gain.gain.setValueAtTime(0.3, now + idx * 0.08);
-            gain.gain.exponentialRampToValueAtTime(0.01, now + idx * 0.08 + 0.2);
-            osc.connect(gain); gain.connect(this.ctx.destination);
-            osc.start(now + idx * 0.08); osc.stop(now + idx * 0.08 + 0.2);
-        });
+        osc.start(); osc.stop(this.ctx.currentTime + 0.2);
     }
 }
 
@@ -308,7 +251,6 @@ class KatawaCrashEngine {
             }
         };
 
-        // DOM controls
         mainBtn.addEventListener('click', handleAction);
         aedBtn.addEventListener('click', () => {
             audio.init();
@@ -323,7 +265,6 @@ class KatawaCrashEngine {
             if (sfxEl) sfxEl.textContent = audio.enabled ? 'Sfx: ON' : 'Sfx: OFF';
         });
 
-        // Overlay menu controls
         document.getElementById('menu-start').addEventListener('click', () => handleAction());
         document.getElementById('menu-how').addEventListener('click', () => {
             document.querySelector('.card').scrollIntoView({ behavior: 'smooth' });
@@ -349,6 +290,17 @@ class KatawaCrashEngine {
             window.open('http://www.katawa-shoujo.com', '_blank');
         });
 
+        this.canvas.addEventListener('click', (e) => {
+            if (this.state === STATE_GAMEOVER) {
+                const rect = this.canvas.getBoundingClientRect();
+                const mx = (e.clientX - rect.left) * (700 / rect.width);
+                const my = (e.clientY - rect.top) * (400 / rect.height);
+                if (mx >= 220 && mx <= 480 && my >= 275 && my <= 325) {
+                    this.resetMenu();
+                }
+            }
+        });
+
         window.addEventListener('keydown', (e) => {
             if (e.code === 'Space') {
                 e.preventDefault();
@@ -369,14 +321,16 @@ class KatawaCrashEngine {
         this.angle = 45;
         this.power = 50;
         document.getElementById('btn-main-action').textContent = '🎯 Lock Angle';
-        document.getElementById('hud-overlay').style.display = 'none';
+        const hudEl = document.getElementById('hud-overlay');
+        if (hudEl) hudEl.style.display = 'none';
         this.updateMenuOverlayState();
     }
 
     launch() {
         this.state = STATE_FLIGHT;
         document.getElementById('btn-main-action').textContent = '⚡ In Flight...';
-        document.getElementById('hud-overlay').style.display = 'flex';
+        const hudEl = document.getElementById('hud-overlay');
+        if (hudEl) hudEl.style.display = 'none';
         this.updateMenuOverlayState();
 
         const rad = (this.angle * Math.PI) / 180;
@@ -431,19 +385,19 @@ class KatawaCrashEngine {
 
         const midPool = [
             { name: 'Hanako', key: 'hanako', title: 'PANIC EXPLOSION!', color: '#ff9ff3' },
-            { name: 'Shizune', key: 'shizune', title: 'TACTICIAN MIRROR BOOST!', color: '#1dd1a1' },
+            { name: 'Shizune', key: 'shizune', title: 'STUDENT COUNCIL GET!', color: '#1dd1a1' },
             { name: 'Misha', key: 'misha', title: 'WAHAHA DRILL BOOST!', color: '#ff6b81' },
-            { name: 'Mutou', key: 'mutou', title: 'CHEMISTRY FLIP BOOST!', color: '#a55eea' },
-            { name: 'Nurse', key: 'nurse', title: 'AED 100% RECHARGE!', color: '#2ed573' },
+            { name: 'Mutou', key: 'mutou', title: 'HOMEWORK FLIP!', color: '#a55eea' },
+            { name: 'Nurse', key: 'nurse', title: 'STRAIGHTEN UP AED!', color: '#2ed573' },
             { name: 'Kenji', key: 'kenji', title: 'CONSPIRACY CATAPULT!', color: '#fa8231' }
         ];
 
         const cameoPool = [
-            { name: 'Akira', key: 'akira', title: 'SECRET CAMEO BOOST!', color: '#fd9644' },
+            { name: 'Akira', key: 'akira', title: 'SUPER BOOST!!!', color: '#fd9644' },
             { name: 'Chiharu', key: 'chiharu', title: 'SCREAMING SPEED BOOST!', color: '#eb4d4b' },
             { name: 'Kubo', key: 'kubo', title: 'KUBO MEGA BOUNCE!', color: '#6ab04c' },
-            { name: 'Natsume', key: 'natsume', title: 'NATSUME SUPER CHARGE!', color: '#be2edd' },
-            { name: 'Sharktopus', key: 'sharktopus1', title: 'SHARKTOPUS APOCALYPSE!', color: '#22a6b3' }
+            { name: 'Natsume', key: 'natsume', title: 'DO NOT WANT CHARGE!', color: '#be2edd' },
+            { name: 'Sharktopus', key: 'sharktopus1', title: 'CTHULHU APOCALYPSE!', color: '#22a6b3' }
         ];
 
         while (this.maxSpawnedX < targetX) {
@@ -452,7 +406,7 @@ class KatawaCrashEngine {
 
             let pool = midPool;
             if (this.maxSpawnedX < 600) pool = launcherPool;
-            else if (Math.random() < 0.28) pool = cameoPool;
+            else if (Math.random() < 0.32) pool = cameoPool;
 
             const c = pool[Math.floor(Math.random() * pool.length)];
             this.characters.push({
@@ -524,7 +478,8 @@ class KatawaCrashEngine {
     resetMenu() {
         this.state = STATE_MENU;
         document.getElementById('btn-main-action').textContent = '🚀 Launch Game';
-        document.getElementById('hud-overlay').style.display = 'none';
+        const hudEl = document.getElementById('hud-overlay');
+        if (hudEl) hudEl.style.display = 'none';
         this.updateMenuOverlayState();
     }
 
@@ -673,15 +628,6 @@ class KatawaCrashEngine {
 
             if (this.distance > 500) this.unlockAch('ach-2');
             if (this.distance > 1000) this.unlockAch('ach-6');
-
-            document.getElementById('hud-dist').textContent = `${this.distance.toFixed(2)} m`;
-            document.getElementById('hud-speed').textContent = `${curSpeed.toFixed(1)} km/h`;
-            document.getElementById('hud-combo').textContent = `${this.comboMultiplier}x`;
-            document.getElementById('hud-misha').textContent = this.mishaBoosts;
-            document.getElementById('hud-fire').textContent = this.fireStatus ? 'ON 🔥' : 'OFF';
-            document.getElementById('hud-fire').style.color = this.fireStatus ? '#ff4757' : '#8e94a5';
-            document.getElementById('aed-pct').textContent = Math.floor(this.aedCharge);
-            document.getElementById('aed-trigger-btn').disabled = this.aedCharge < 100;
         }
 
         if (this.screenShake > 0) this.screenShake *= 0.85;
@@ -762,13 +708,12 @@ class KatawaCrashEngine {
                 this.ctx.drawImage(skyBg, 0, 0 - camOffsetY * 0.3, 700, 340);
             } else {
                 const skyGrad = this.ctx.createLinearGradient(0, 0, 0, 320);
-                skyGrad.addColorStop(0, '#0a1122');
-                skyGrad.addColorStop(1, '#223354');
+                skyGrad.addColorStop(0, '#1da1f2');
+                skyGrad.addColorStop(1, '#44bbff');
                 this.ctx.fillStyle = skyGrad;
                 this.ctx.fillRect(0, 0, 700, 320);
             }
 
-            // Draw scrolling field/hills parallax layer
             const fBg1 = assets.getImage('field_bg1');
             const fBg2 = assets.getImage('field_bg2');
             const fBg3 = assets.getImage('field_bg3');
@@ -981,66 +926,235 @@ class KatawaCrashEngine {
             }
         }
 
-        if (this.state === STATE_GAMEOVER) {
-            this.ctx.fillStyle = 'rgba(6, 8, 16, 0.92)';
-            this.ctx.fillRect(140, 50, 420, 300);
-            this.ctx.strokeStyle = 'rgba(255,255,255,0.25)';
-            this.ctx.lineWidth = 2;
-            this.ctx.strokeRect(140, 50, 420, 300);
+        // -------------------------------------------------------------
+        // AUTHENTIC FLASH IN-GAME FLIGHT HUD (1:1 matching Flash SWF)
+        // -------------------------------------------------------------
+        if (this.state === STATE_FLIGHT) {
+            const curSpeed = Math.sqrt(this.hisao.vx ** 2 + this.hisao.vy ** 2) * 3.6;
 
-            this.ctx.fillStyle = '#f7b731';
-            this.ctx.font = '800 24px "Outfit"';
-            this.ctx.textAlign = 'center';
-            this.ctx.fillText('📋 REPORT CARD', 350, 90);
+            // 1. TOP-LEFT: Misha Boost & AED Charge Counters
+            const mishaImg = assets.getImage('misha');
+            if (mishaImg) {
+                this.ctx.drawImage(mishaImg, 8, 8, 24, 24);
+            }
+            this.ctx.fillStyle = '#ff00ff';
+            this.ctx.font = '700 20px "Impact", "Outfit", sans-serif';
+            this.ctx.textAlign = 'left';
+            this.ctx.fillText(`x${this.mishaBoosts}`, 36, 26);
 
-            let rank = 'C';
-            if (this.distance > 1500) rank = 'RANK S (LEGENDARY)';
-            else if (this.distance > 1000) rank = 'RANK A (EXCELLENT)';
-            else if (this.distance > 600) rank = 'RANK B (GREAT)';
-            else if (this.distance > 300) rank = 'RANK C (GOOD)';
-            else rank = 'RANK D (TRY AGAIN)';
-
+            // AED Icon + %
+            this.ctx.fillStyle = '#00b894';
+            this.ctx.fillRect(8, 36, 24, 24);
             this.ctx.fillStyle = '#ffffff';
-            this.ctx.font = '14px "JetBrains Mono"';
-            this.ctx.fillText(`Total Distance: ${this.distance.toFixed(2)} m`, 350, 135);
-            this.ctx.fillText(`Max Altitude: ${this.maxAltitude.toFixed(2)} m`, 350, 165);
-            this.ctx.fillText(`Top Speed: ${this.topSpeed.toFixed(1)} km/h`, 350, 195);
-            this.ctx.fillText(`Combos Struck: ${this.combos}`, 350, 225);
-            this.ctx.fillText(`Peak Multiplier: ${this.comboMultiplier}x`, 350, 255);
+            this.ctx.font = '700 14px sans-serif';
+            this.ctx.fillText('⚡', 12, 53);
 
-            this.ctx.fillStyle = '#20bf6b';
-            this.ctx.font = 'bold 16px "Outfit"';
-            this.ctx.fillText(`GRADE: ${rank}`, 350, 290);
+            const aedPct = Math.floor(this.aedCharge);
+            this.ctx.fillStyle = aedPct >= 100 ? '#00ff00' : '#00ff00';
+            this.ctx.font = '700 20px "Impact", "Outfit", sans-serif';
+            this.ctx.fillText(`${aedPct}%`, 40, 56);
 
-            this.ctx.fillStyle = '#8e94a5';
-            this.ctx.font = '12px "Outfit"';
-            this.ctx.fillText('Press SPACEBAR or click Play Again to launch again!', 350, 330);
+            // 2. PLAYER HISAO RED ARROW & ALTITUDE METER
+            if (altitude > 0.5) {
+                const arrowX = hScreenX;
+                const arrowY = hScreenY - 50;
+
+                this.ctx.save();
+                this.ctx.fillStyle = '#ff0000';
+                this.ctx.strokeStyle = '#000000';
+                this.ctx.lineWidth = 3;
+
+                this.ctx.beginPath();
+                this.ctx.moveTo(arrowX - 15, arrowY + 40);
+                this.ctx.lineTo(arrowX - 15, arrowY);
+                this.ctx.lineTo(arrowX - 30, arrowY);
+                this.ctx.lineTo(arrowX, arrowY - 35);
+                this.ctx.lineTo(arrowX + 30, arrowY);
+                this.ctx.lineTo(arrowX + 15, arrowY);
+                this.ctx.lineTo(arrowX + 15, arrowY + 40);
+                this.ctx.closePath();
+                this.ctx.fill();
+                this.ctx.stroke();
+
+                this.ctx.fillStyle = '#000000';
+                this.ctx.font = '900 12px sans-serif';
+                this.ctx.textAlign = 'center';
+                this.ctx.fillText('HISAO', arrowX, arrowY - 15);
+                this.ctx.restore();
+
+                this.ctx.fillStyle = '#000000';
+                this.ctx.font = '700 18px "Outfit", sans-serif';
+                this.ctx.textAlign = 'left';
+                this.ctx.fillText(`${altitude.toFixed(2)}m`, hScreenX + 35, hScreenY - 10);
+            }
+
+            // 3. TOP-RIGHT: Speedometer & SPECIAL Box
+            const curSpeedMs = (curSpeed / 3.6).toFixed(2);
+            this.ctx.save();
+            this.ctx.shadowColor = 'rgba(255, 255, 255, 0.85)';
+            this.ctx.shadowBlur = 4;
+            this.ctx.fillStyle = '#000000';
+            this.ctx.font = '700 20px "Outfit", sans-serif';
+            this.ctx.textAlign = 'right';
+            this.ctx.fillText(`${curSpeedMs}m/s`, 690, 24);
+            this.ctx.restore();
+
+            this.ctx.fillStyle = '#000000';
+            this.ctx.fillRect(570, 30, 120, 10);
+            this.ctx.fillStyle = '#ffffff';
+            this.ctx.fillRect(570 + (this.power / 100) * 116, 28, 4, 14);
+
+            // SPECIAL Box
+            const spcX = 560, spcY = 44, spcW = 130;
+            this.ctx.fillStyle = '#000000';
+            this.ctx.fillRect(spcX, spcY, spcW, 18);
+            this.ctx.fillStyle = '#ffffff';
+            this.ctx.font = '700 12px sans-serif';
+            this.ctx.textAlign = 'center';
+            this.ctx.fillText('SPECIAL', spcX + spcW / 2, spcY + 14);
+
+            const charIconsRow1 = [
+                { key: 'shizune', bg: '#0000ff' },
+                { key: 'emi', bg: '#ff0000' },
+                { key: 'misha', bg: '#8b4513' },
+                { key: 'lilly', bg: '#ffd700' }
+            ];
+            const charIconsRow2 = [
+                { key: 'mutou', bg: '#ffffff' },
+                { key: 'hanako', bg: '#800080' },
+                { key: 'rin', bg: '#ff0000' }
+            ];
+
+            const itemW = 28, itemH = 28;
+            charIconsRow1.forEach((c, idx) => {
+                const ix = spcX + 5 + idx * (itemW + 3);
+                const iy = spcY + 22;
+                this.ctx.fillStyle = c.bg;
+                this.ctx.fillRect(ix, iy, itemW, itemH);
+                this.ctx.strokeStyle = '#000000';
+                this.ctx.lineWidth = 1;
+                this.ctx.strokeRect(ix, iy, itemW, itemH);
+                const cImg = assets.getImage(c.key);
+                if (cImg) this.ctx.drawImage(cImg, ix + 2, iy + 2, itemW - 4, itemH - 4);
+            });
+
+            charIconsRow2.forEach((c, idx) => {
+                const ix = spcX + 20 + idx * (itemW + 3);
+                const iy = spcY + 53;
+                this.ctx.fillStyle = c.bg;
+                this.ctx.fillRect(ix, iy, itemW, itemH);
+                this.ctx.strokeStyle = '#000000';
+                this.ctx.lineWidth = 1;
+                this.ctx.strokeRect(ix, iy, itemW, itemH);
+                const cImg = assets.getImage(c.key);
+                if (cImg) this.ctx.drawImage(cImg, ix + 2, iy + 2, itemW - 4, itemH - 4);
+            });
+        }
+
+        if (this.state === STATE_GAMEOVER) {
+            // Authentic Flash YAMAKU H.S. BALLISTICS CLUB Summary Modal
+            const bx = 100, by = 25, bw = 500, bh = 340;
+            this.ctx.fillStyle = '#ffffff';
+            this.ctx.fillRect(bx, by, bw, bh);
+            this.ctx.strokeStyle = '#000000';
+            this.ctx.lineWidth = 2;
+            this.ctx.strokeRect(bx, by, bw, bh);
+
+            // Header Title
+            this.ctx.fillStyle = '#000000';
+            this.ctx.font = '700 22px "Outfit", sans-serif';
+            this.ctx.textAlign = 'center';
+            this.ctx.fillText('YAMAKU H.S. BALLISTICS CLUB', 350, by + 38);
+
+            // Underline
+            this.ctx.fillRect(bx + 15, by + 48, bw - 30, 2);
+
+            // Rows
+            const rows = [
+                { label: 'Total Distance:', mid: 'Maximum', val: (this.distance * 10).toFixed(2) },
+                { label: 'Height:', mid: 'Maximum', val: (this.maxAltitude * 10).toFixed(2) },
+                { label: 'Speed:', mid: 'Objects', val: (this.topSpeed / 3.6 * 3).toFixed(2) },
+                { label: 'Struck:', mid: 'Special', val: `${this.combos}` },
+                { label: 'Events:', mid: 'Authentication', val: '0' }
+            ];
+
+            rows.forEach((r, idx) => {
+                const ry = by + 88 + idx * 30;
+                this.ctx.font = '700 16px "Outfit", sans-serif';
+
+                this.ctx.fillStyle = '#000000';
+                this.ctx.textAlign = 'right';
+                this.ctx.fillText(r.label, 260, ry);
+
+                this.ctx.textAlign = 'left';
+                this.ctx.fillText(r.mid, 275, ry);
+
+                this.ctx.fillStyle = '#800000';
+                this.ctx.fillText(r.val, 400, ry);
+            });
+
+            // Main Menu Button
+            const btnX = 220, btnY = by + 248, btnW = 260, btnH = 42;
+            const grad = this.ctx.createLinearGradient(btnX, btnY, btnX, btnY + btnH);
+            grad.addColorStop(0, '#00e5ff');
+            grad.addColorStop(1, '#00b4d8');
+            this.ctx.fillStyle = grad;
+
+            this.ctx.beginPath();
+            if (this.ctx.roundRect) {
+                this.ctx.roundRect(btnX, btnY, btnW, btnH, 12);
+            } else {
+                this.ctx.rect(btnX, btnY, btnW, btnH);
+            }
+            this.ctx.fill();
+            this.ctx.strokeStyle = '#0088cc';
+            this.ctx.lineWidth = 2;
+            this.ctx.stroke();
+
+            this.ctx.fillStyle = '#0000ff';
+            this.ctx.font = '700 18px "Outfit", sans-serif';
+            this.ctx.textAlign = 'center';
+            this.ctx.fillText('Main menu', 350, btnY + 27);
         }
 
         if (this.state === STATE_MENU) {
-            const startBg = assets.getImage('starting_bg');
-            if (startBg) {
-                this.ctx.drawImage(startBg, 0, 185);
-            }
-            const grassTile = assets.getImage('grass_tile');
-            if (grassTile) {
-                for (let x = 0; x < 700; x += grassTile.width) {
-                    this.ctx.drawImage(grassTile, x, 320);
-                }
-            }
-
-            this.ctx.fillStyle = 'rgba(6, 8, 16, 0.45)'; // lighter overlay for better graphics visibility
-            this.ctx.fillRect(0, 0, 700, 400);
-
-            const logoImg = assets.getImage('logo');
-            if (logoImg) {
-                this.ctx.drawImage(logoImg, 350 - logoImg.width / 2, 45);
+            const snowBg = assets.getImage('snow_bg');
+            if (snowBg) {
+                this.ctx.drawImage(snowBg, 0, 0, 700, 400);
             } else {
-                this.ctx.fillStyle = '#ffffff';
-                this.ctx.font = '800 36px "Outfit"';
-                this.ctx.textAlign = 'center';
-                this.ctx.fillText('KATAWA CRASH', 350, 90);
+                this.ctx.fillStyle = '#eef2f7';
+                this.ctx.fillRect(0, 0, 700, 400);
             }
+
+            // Authentic SWF bottom right credits box
+            const bx = 550, by = 295, bw = 145, bh = 100;
+            this.ctx.fillStyle = '#ffffff';
+            this.ctx.fillRect(bx, by, bw, bh);
+            this.ctx.strokeStyle = '#000000';
+            this.ctx.lineWidth = 1;
+            this.ctx.strokeRect(bx, by, bw, bh);
+
+            this.ctx.fillStyle = '#000000';
+            this.ctx.font = '700 8px "Press Start 2P", monospace';
+            this.ctx.textAlign = 'left';
+            this.ctx.fillText('KATAWA CRASH', bx + 5, by + 12);
+
+            this.ctx.font = '9px sans-serif';
+            const lines = [
+                'a Flash game by brent',
+                'Thx to 4LS, Doomfest,',
+                'nicol, SZS, #k-s, DJ',
+                'Fresh, and whoever',
+                'made Nanaca Crash',
+                'twitter: @KatawaCrash'
+            ];
+            lines.forEach((line, idx) => {
+                this.ctx.fillStyle = '#000000';
+                this.ctx.fillText(line, bx + 5, by + 24 + idx * 11);
+            });
+
+            this.ctx.fillStyle = '#008800';
+            this.ctx.fillText('!HaoVsu9Sz6', bx + 5, by + 24 + lines.length * 11);
         }
 
         this.ctx.restore();
