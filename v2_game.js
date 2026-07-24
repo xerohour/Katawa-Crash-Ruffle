@@ -837,10 +837,7 @@ class KatawaCrashV2Engine {
                         this.ctx.fill();
                     }
 
-                    this.ctx.fillStyle = '#ffffff';
-                    this.ctx.font = 'bold 10px "Outfit"';
-                    this.ctx.textAlign = 'center';
-                    this.ctx.fillText(char.name, cx, groundY - 48);
+                    // Characters rendered natively on ground matching Flash
                 }
             });
         }
@@ -1041,15 +1038,15 @@ class KatawaCrashV2Engine {
             this.ctx.fillText('SPECIAL', spcX + spcW / 2, spcY + 14);
 
             const charIconsRow1 = [
-                { key: 'shizune', bg: '#0000ff' },
-                { key: 'emi', bg: '#ff0000' },
-                { key: 'misha', bg: '#8b4513' },
-                { key: 'lilly', bg: '#ffd700' }
+                { key: 'shizune', bg: '#0033cc' },
+                { key: 'emi', bg: '#cc0000' },
+                { key: 'misha', bg: '#996600' },
+                { key: 'lilly', bg: '#cc9900' }
             ];
             const charIconsRow2 = [
-                { key: 'mutou', bg: '#ffffff' },
-                { key: 'hanako', bg: '#800080' },
-                { key: 'rin', bg: '#ff0000' }
+                { key: 'mutou', bg: '#0033cc' },
+                { key: 'hanako', bg: '#660066' },
+                { key: 'rin', bg: '#cc0000' }
             ];
 
             const itemW = 28, itemH = 28;
