@@ -329,7 +329,8 @@ class KatawaCrashV2Engine {
     launch() {
         this.state = V2_STATE_FLIGHT;
         document.getElementById('btn-main-action').textContent = '⚡ In Flight...';
-        document.getElementById('hud-overlay').style.display = 'flex';
+        const hudEl = document.getElementById('hud-overlay');
+        if (hudEl) hudEl.style.display = 'none';
         this.updateMenuOverlayState();
 
         const rad = (this.angle * Math.PI) / 180;
@@ -948,6 +949,131 @@ class KatawaCrashV2Engine {
                 this.ctx.font = 'bold 11px "JetBrains Mono"';
                 this.ctx.fillText(`POWER: ${Math.floor(this.power)}%`, lx + 70, ly + 14);
             }
+        }
+
+        // -------------------------------------------------------------
+        // AUTHENTIC FLASH IN-GAME FLIGHT HUD (1:1 matching Flash SWF)
+        // -------------------------------------------------------------
+        if (this.state === V2_STATE_FLIGHT) {
+            const curSpeed = Math.sqrt(this.hisao.vx ** 2 + this.hisao.vy ** 2) * 3.6;
+
+            // 1. TOP-LEFT: Misha Boost & AED Charge Counters
+            const mishaImg = v2Assets.getImage('misha');
+            if (mishaImg) {
+                this.ctx.drawImage(mishaImg, 8, 8, 24, 24);
+            }
+            this.ctx.fillStyle = '#ff00ff';
+            this.ctx.font = '700 20px "Impact", "Outfit", sans-serif';
+            this.ctx.textAlign = 'left';
+            this.ctx.fillText(`x${this.mishaBoosts}`, 36, 26);
+
+            // AED Icon + %
+            this.ctx.fillStyle = '#00b894';
+            this.ctx.fillRect(8, 36, 24, 24);
+            this.ctx.fillStyle = '#ffffff';
+            this.ctx.font = '700 14px sans-serif';
+            this.ctx.fillText('⚡', 12, 53);
+
+            const aedPct = Math.floor(this.aedCharge);
+            this.ctx.fillStyle = aedPct >= 100 ? '#00ff00' : '#00ff00';
+            this.ctx.font = '700 20px "Impact", "Outfit", sans-serif';
+            this.ctx.fillText(`${aedPct}%`, 40, 56);
+
+            // 2. PLAYER HISAO RED ARROW & ALTITUDE METER
+            if (altitude > 0.5) {
+                const arrowX = hScreenX;
+                const arrowY = hScreenY - 50;
+
+                this.ctx.save();
+                this.ctx.fillStyle = '#ff0000';
+                this.ctx.strokeStyle = '#000000';
+                this.ctx.lineWidth = 3;
+
+                this.ctx.beginPath();
+                this.ctx.moveTo(arrowX - 15, arrowY + 40);
+                this.ctx.lineTo(arrowX - 15, arrowY);
+                this.ctx.lineTo(arrowX - 30, arrowY);
+                this.ctx.lineTo(arrowX, arrowY - 35);
+                this.ctx.lineTo(arrowX + 30, arrowY);
+                this.ctx.lineTo(arrowX + 15, arrowY);
+                this.ctx.lineTo(arrowX + 15, arrowY + 40);
+                this.ctx.closePath();
+                this.ctx.fill();
+                this.ctx.stroke();
+
+                this.ctx.fillStyle = '#000000';
+                this.ctx.font = '900 12px sans-serif';
+                this.ctx.textAlign = 'center';
+                this.ctx.fillText('HISAO', arrowX, arrowY - 15);
+                this.ctx.restore();
+
+                this.ctx.fillStyle = '#000000';
+                this.ctx.font = '700 18px "Outfit", sans-serif';
+                this.ctx.textAlign = 'left';
+                this.ctx.fillText(`${altitude.toFixed(2)}m`, hScreenX + 35, hScreenY - 10);
+            }
+
+            // 3. TOP-RIGHT: Speedometer & SPECIAL Box
+            const curSpeedMs = (curSpeed / 3.6).toFixed(2);
+            this.ctx.save();
+            this.ctx.shadowColor = 'rgba(255, 255, 255, 0.85)';
+            this.ctx.shadowBlur = 4;
+            this.ctx.fillStyle = '#000000';
+            this.ctx.font = '700 20px "Outfit", sans-serif';
+            this.ctx.textAlign = 'right';
+            this.ctx.fillText(`${curSpeedMs}m/s`, 690, 24);
+            this.ctx.restore();
+
+            this.ctx.fillStyle = '#000000';
+            this.ctx.fillRect(570, 30, 120, 10);
+            this.ctx.fillStyle = '#ffffff';
+            this.ctx.fillRect(570 + (this.power / 100) * 116, 28, 4, 14);
+
+            // SPECIAL Box
+            const spcX = 560, spcY = 44, spcW = 130;
+            this.ctx.fillStyle = '#000000';
+            this.ctx.fillRect(spcX, spcY, spcW, 18);
+            this.ctx.fillStyle = '#ffffff';
+            this.ctx.font = '700 12px sans-serif';
+            this.ctx.textAlign = 'center';
+            this.ctx.fillText('SPECIAL', spcX + spcW / 2, spcY + 14);
+
+            const charIconsRow1 = [
+                { key: 'shizune', bg: '#0000ff' },
+                { key: 'emi', bg: '#ff0000' },
+                { key: 'misha', bg: '#8b4513' },
+                { key: 'lilly', bg: '#ffd700' }
+            ];
+            const charIconsRow2 = [
+                { key: 'mutou', bg: '#ffffff' },
+                { key: 'hanako', bg: '#800080' },
+                { key: 'rin', bg: '#ff0000' }
+            ];
+
+            const itemW = 28, itemH = 28;
+            charIconsRow1.forEach((c, idx) => {
+                const ix = spcX + 5 + idx * (itemW + 3);
+                const iy = spcY + 22;
+                this.ctx.fillStyle = c.bg;
+                this.ctx.fillRect(ix, iy, itemW, itemH);
+                this.ctx.strokeStyle = '#000000';
+                this.ctx.lineWidth = 1;
+                this.ctx.strokeRect(ix, iy, itemW, itemH);
+                const cImg = v2Assets.getImage(c.key);
+                if (cImg) this.ctx.drawImage(cImg, ix + 2, iy + 2, itemW - 4, itemH - 4);
+            });
+
+            charIconsRow2.forEach((c, idx) => {
+                const ix = spcX + 20 + idx * (itemW + 3);
+                const iy = spcY + 53;
+                this.ctx.fillStyle = c.bg;
+                this.ctx.fillRect(ix, iy, itemW, itemH);
+                this.ctx.strokeStyle = '#000000';
+                this.ctx.lineWidth = 1;
+                this.ctx.strokeRect(ix, iy, itemW, itemH);
+                const cImg = v2Assets.getImage(c.key);
+                if (cImg) this.ctx.drawImage(cImg, ix + 2, iy + 2, itemW - 4, itemH - 4);
+            });
         }
 
         if (this.state === V2_STATE_GAMEOVER) {
