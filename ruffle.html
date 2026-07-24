@@ -140,13 +140,13 @@
                 <div class="swf-selector-group">
                     <label for="swf-select">Target SWF:</label>
                     <select id="swf-select">
-                        <option value="Katawa.crash.swf">Katawa.crash.swf (Katawa Crash v1.0.2)</option>
+                        <option value="Katawa.crash.swf" selected>Katawa.crash.swf (Compiled ActionScript Build v1.0.2)</option>
                         <option value="nanaca-crash_v110.swf">nanaca-crash_v110.swf (NANACA-CRASH Local)</option>
-                        <option value="https://archive.org/download/nanaca-crash_v110/nanaca-crash_v110.swf" selected>NANACA-CRASH (Archive.org URL)</option>
                         <option value="Source Code/_assets/assets.swf">Source Code/_assets/assets.swf (Embedded Assets)</option>
+                        <option value="https://archive.org/download/nanaca-crash_v110/nanaca-crash_v110.swf">NANACA-CRASH (Archive.org URL)</option>
                     </select>
 
-                    <input type="text" id="custom-swf-input" value="https://archive.org/download/nanaca-crash_v110/nanaca-crash_v110.swf" placeholder="Enter SWF URL (e.g. https://...)" />
+                    <input type="text" id="custom-swf-input" value="Katawa.crash.swf" placeholder="Enter SWF URL (e.g. https://...)" />
                     <button id="btn-load" class="primary">🚀 Load SWF</button>
                 </div>
                 <div class="control-group">
@@ -258,7 +258,7 @@
 
         window.addEventListener('DOMContentLoaded', () => {
             const urlParams = new URLSearchParams(window.location.search);
-            const initialSwf = urlParams.get('swf') || 'https://archive.org/download/nanaca-crash_v110/nanaca-crash_v110.swf';
+            const initialSwf = urlParams.get('swf') || 'Katawa.crash.swf';
             customInput.value = initialSwf;
             initRuffle(initialSwf);
         });
