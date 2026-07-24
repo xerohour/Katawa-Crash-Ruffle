@@ -523,9 +523,8 @@ class KatawaCrashV2Engine {
             if (curSpeed > this.topSpeed) this.topSpeed = curSpeed;
 
             this.targetCameraX = Math.max(0, this.hisao.x - 200);
-            this.targetCameraY = Math.min(0, (this.hisao.y - 200) * 0.4);
             this.cameraX += (this.targetCameraX - this.cameraX) * 0.16;
-            this.cameraY += (this.targetCameraY - this.cameraY) * 0.16;
+            this.cameraY = 0;
 
             if (this.aedCharge < 100) {
                 this.aedCharge = Math.min(100, this.aedCharge + 0.28);
@@ -728,48 +727,20 @@ class KatawaCrashV2Engine {
             if (bigEarthBg) {
                 this.ctx.drawImage(bigEarthBg, 440 - (this.cameraX * 0.02) % 400, 40 - camOffsetY * 0.2, 220, 220);
             }
+        } else if (altitude > 90) {
+            // High altitude gradient
+            const skyGrad = this.ctx.createLinearGradient(0, 0, 0, 320);
+            skyGrad.addColorStop(0, '#0a1122');
+            skyGrad.addColorStop(1, '#223354');
+            this.ctx.fillStyle = skyGrad;
+            this.ctx.fillRect(0, 0, 700, 320);
         } else {
-            if (skyBg) {
-                this.ctx.drawImage(skyBg, 0, 0 - camOffsetY * 0.3, 700, 340);
-            } else {
-                const skyGrad = this.ctx.createLinearGradient(0, 0, 0, 320);
-                skyGrad.addColorStop(0, '#0a1122');
-                skyGrad.addColorStop(1, '#223354');
-                this.ctx.fillStyle = skyGrad;
-                this.ctx.fillRect(0, 0, 700, 320);
-            }
-
-            const fBg1 = v2Assets.getImage('field_bg1');
-            const fBg2 = v2Assets.getImage('field_bg2');
-            const fBg3 = v2Assets.getImage('field_bg3');
-            if (fBg1 && fBg2 && fBg3) {
-                const hillWidth = 691;
-                const scrollX = (this.cameraX * 0.65);
-                const startIndex = Math.floor(scrollX / hillWidth);
-                const endIndex = startIndex + 2;
-                for (let i = startIndex; i <= endIndex; i++) {
-                    const hillImg = (i % 3 === 0) ? fBg1 : (i % 3 === 1) ? fBg2 : fBg3;
-                    const hx = i * hillWidth - scrollX;
-                    this.ctx.drawImage(hillImg, hx, 185 - camOffsetY * 0.5);
-                }
-            }
-
-            const cloud1 = v2Assets.getImage('cloud1');
-            const cloud2 = v2Assets.getImage('cloud2');
-            if (cloud1) {
-                const c1X = 600 - (this.cameraX * 0.15) % 900;
-                this.ctx.drawImage(cloud1, c1X, 40 - camOffsetY * 0.2);
-            }
-            if (cloud2) {
-                const c2X = 300 - (this.cameraX * 0.2) % 800;
-                this.ctx.drawImage(cloud2, c2X, 80 - camOffsetY * 0.25);
-            }
-
-            if (altitude > 90 && planetEarthBg) {
-                this.ctx.drawImage(planetEarthBg, 510 - (this.cameraX * 0.03) % 400, 30 - camOffsetY * 0.25, 150, 150);
-            }
+            // Authentic Flash cyan sky
+            this.ctx.fillStyle = '#48c1e8';
+            this.ctx.fillRect(0, 0, 700, 320);
         }
 
+        // Parallax skylines
         const skyline1 = v2Assets.getImage('skyline1');
         const skyline2 = v2Assets.getImage('skyline2');
 
@@ -787,24 +758,48 @@ class KatawaCrashV2Engine {
             }
         }
 
+        // Field Background (Ground layer, 1.0 scroll speed)
+        // field_bg is 135px tall, drawn at 185, its bottom sits perfectly at 320 (groundY).
+        const fBg1 = v2Assets.getImage('field_bg1');
+        const fBg2 = v2Assets.getImage('field_bg2');
+        const fBg3 = v2Assets.getImage('field_bg3');
+        if (fBg1 && fBg2 && fBg3) {
+            const hillWidth = 691;
+            const scrollX = this.cameraX; // 1.0 speed
+            const startIndex = Math.floor(scrollX / hillWidth);
+            const endIndex = startIndex + 2;
+            for (let i = startIndex; i <= endIndex; i++) {
+                const hillImg = (i % 3 === 0) ? fBg1 : (i % 3 === 1) ? fBg2 : fBg3;
+                const hx = i * hillWidth - scrollX;
+                this.ctx.drawImage(hillImg, hx, 185 - camOffsetY);
+            }
+        }
+
+        const cloud1 = v2Assets.getImage('cloud1');
+        const cloud2 = v2Assets.getImage('cloud2');
+        if (cloud1) {
+            const c1X = 600 - (this.cameraX * 0.15) % 900;
+            this.ctx.drawImage(cloud1, c1X, 40 - camOffsetY * 0.2);
+        }
+        if (cloud2) {
+            const c2X = 300 - (this.cameraX * 0.2) % 800;
+            this.ctx.drawImage(cloud2, c2X, 80 - camOffsetY * 0.25);
+        }
+
         const startBg = v2Assets.getImage('starting_bg');
         if (startBg && this.cameraX < 700) {
             this.ctx.drawImage(startBg, -this.cameraX, 185 - camOffsetY);
         }
 
-        const grassTile = v2Assets.getImage('grass_tile');
-        const groundY = 320 - camOffsetY;
-        if (grassTile) {
-            const gX = (this.cameraX) % grassTile.width;
-            for (let x = -gX; x < 700; x += grassTile.width) {
-                this.ctx.drawImage(grassTile, x, groundY);
-            }
-        } else {
-            this.ctx.fillStyle = '#20bf6b';
-            this.ctx.fillRect(0, groundY, 700, 12);
-            this.ctx.fillStyle = '#3a2e2b';
-            this.ctx.fillRect(0, groundY + 12, 700, 68);
+        if (altitude > 90 && planetEarthBg) {
+            this.ctx.drawImage(planetEarthBg, 510 - (this.cameraX * 0.03) % 400, 30 - camOffsetY * 0.25, 150, 150);
         }
+
+        const groundY = 320 - camOffsetY;
+
+        // Fill the area below ground level with a solid dark brown/green to match the bottom of field_bg
+        this.ctx.fillStyle = '#2c1e16'; // Dark earthy color matching the bottom of the field assets
+        this.ctx.fillRect(0, groundY, 700, 400 - groundY);
 
         this.ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
         this.ctx.font = 'bold 11px "JetBrains Mono"';
@@ -824,8 +819,8 @@ class KatawaCrashV2Engine {
                 if (cx >= -50 && cx <= 750) {
                     const charImg = v2Assets.getImage(char.key);
                     if (charImg) {
-                        const dw = charImg.width * 0.75;
-                        const dh = charImg.height * 0.75;
+                        const dw = charImg.width * 0.85;
+                        const dh = charImg.height * 0.85;
                         const cy = groundY - dh + 2;
                         if (char.hit) this.ctx.globalAlpha = 0.45;
                         this.ctx.drawImage(charImg, cx - dw / 2, cy, dw, dh);
@@ -836,8 +831,6 @@ class KatawaCrashV2Engine {
                         this.ctx.arc(cx, groundY - 15, char.radius, 0, Math.PI * 2);
                         this.ctx.fill();
                     }
-
-                    // Characters rendered natively on ground matching Flash
                 }
             });
         }
@@ -880,8 +873,8 @@ class KatawaCrashV2Engine {
         this.ctx.rotate(this.hisao.rot);
 
         if (hisaoImg) {
-            const hw = hisaoImg.width * 0.75;
-            const hh = hisaoImg.height * 0.75;
+            const hw = hisaoImg.width * 0.85;
+            const hh = hisaoImg.height * 0.85;
             this.ctx.drawImage(hisaoImg, -hw / 2, -hh / 2, hw, hh);
         } else {
             this.ctx.fillStyle = '#f7b731';
@@ -956,32 +949,60 @@ class KatawaCrashV2Engine {
         if (this.state === V2_STATE_FLIGHT) {
             const curSpeed = Math.sqrt(this.hisao.vx ** 2 + this.hisao.vy ** 2) * 3.6;
 
+            // MENU Skew Box
+            this.ctx.fillStyle = '#ffffff';
+            this.ctx.beginPath();
+            this.ctx.moveTo(0, 0);
+            this.ctx.lineTo(120, 0);
+            this.ctx.lineTo(80, 24);
+            this.ctx.lineTo(0, 24);
+            this.ctx.fill();
+            this.ctx.fillStyle = '#6c5ce7'; // Purple stripe
+            this.ctx.beginPath();
+            this.ctx.moveTo(70, 0);
+            this.ctx.lineTo(110, 0);
+            this.ctx.lineTo(70, 24);
+            this.ctx.lineTo(30, 24);
+            this.ctx.fill();
+            this.ctx.fillStyle = '#000000';
+            this.ctx.font = 'bold 16px sans-serif';
+            this.ctx.textAlign = 'left';
+            this.ctx.fillText('MENU', 20, 18);
+
             // 1. TOP-LEFT: Misha Boost & AED Charge Counters
             const mishaImg = v2Assets.getImage('misha');
             if (mishaImg) {
-                this.ctx.drawImage(mishaImg, 8, 8, 24, 24);
+                this.ctx.drawImage(mishaImg, 4, 30, 32, 32);
             }
             this.ctx.fillStyle = '#ff00ff';
-            this.ctx.font = '700 20px "Impact", "Outfit", sans-serif';
-            this.ctx.textAlign = 'left';
-            this.ctx.fillText(`x${this.mishaBoosts}`, 36, 26);
+            this.ctx.strokeStyle = '#000000';
+            this.ctx.lineWidth = 3;
+            this.ctx.font = '700 22px "Impact", "Outfit", sans-serif';
+            this.ctx.strokeText(`x${this.mishaBoosts}`, 42, 54);
+            this.ctx.fillText(`x${this.mishaBoosts}`, 42, 54);
 
             // AED Icon + %
             this.ctx.fillStyle = '#00b894';
-            this.ctx.fillRect(8, 36, 24, 24);
+            this.ctx.fillRect(4, 68, 32, 32);
+            this.ctx.strokeStyle = '#000000';
+            this.ctx.lineWidth = 1;
+            this.ctx.strokeRect(4, 68, 32, 32);
             this.ctx.fillStyle = '#ffffff';
-            this.ctx.font = '700 14px sans-serif';
-            this.ctx.fillText('⚡', 12, 53);
+            this.ctx.font = '700 20px sans-serif';
+            this.ctx.fillText('⚡', 8, 92);
 
             const aedPct = Math.floor(this.aedCharge);
             this.ctx.fillStyle = aedPct >= 100 ? '#00ff00' : '#00ff00';
-            this.ctx.font = '700 20px "Impact", "Outfit", sans-serif';
-            this.ctx.fillText(`${aedPct}%`, 40, 56);
+            this.ctx.strokeStyle = '#000000';
+            this.ctx.lineWidth = 3;
+            this.ctx.font = '700 22px "Impact", "Outfit", sans-serif';
+            this.ctx.strokeText(`${aedPct}%`, 42, 94);
+            this.ctx.fillText(`${aedPct}%`, 42, 94);
 
             // 2. PLAYER HISAO RED ARROW & ALTITUDE METER
-            if (altitude > 0.5) {
-                const arrowX = hScreenX;
-                const arrowY = hScreenY - 50;
+            if (altitude > 0.5 && hScreenY < -30) {
+                const arrowX = Math.max(50, Math.min(650, hScreenX));
+                const arrowY = 70; // Fixed near top of screen
 
                 this.ctx.save();
                 this.ctx.fillStyle = '#ff0000';
@@ -1009,44 +1030,44 @@ class KatawaCrashV2Engine {
                 this.ctx.fillStyle = '#000000';
                 this.ctx.font = '700 18px "Outfit", sans-serif';
                 this.ctx.textAlign = 'left';
-                this.ctx.fillText(`${altitude.toFixed(2)}m`, hScreenX + 35, hScreenY - 10);
+                this.ctx.fillText(`${altitude.toFixed(2)}m`, arrowX + 35, arrowY + 10);
             }
 
-            // 3. TOP-RIGHT: Speedometer & SPECIAL Box
-            const curSpeedMs = (curSpeed / 3.6).toFixed(2);
-            this.ctx.save();
-            this.ctx.shadowColor = 'rgba(255, 255, 255, 0.85)';
-            this.ctx.shadowBlur = 4;
+            // 3. TOP-RIGHT: Record, Current, Speed, Power Bar, rUMBa box
             this.ctx.fillStyle = '#000000';
-            this.ctx.font = '700 20px "Outfit", sans-serif';
+            this.ctx.font = '600 20px "Arial", sans-serif';
             this.ctx.textAlign = 'right';
-            this.ctx.fillText(`${curSpeedMs}m/s`, 690, 24);
-            this.ctx.restore();
+            this.ctx.fillText(`RECORD: ${this.bestRecord.toFixed(2)}m`, 690, 24);
+            this.ctx.fillText(`THIS RUN: ${this.distance.toFixed(2)}m`, 690, 48);
+            this.ctx.fillText(`${(curSpeed / 3.6).toFixed(2)}m/s`, 690, 72);
 
-            this.ctx.fillStyle = '#000000';
-            this.ctx.fillRect(570, 30, 120, 10);
+            this.ctx.fillStyle = '#333333';
+            this.ctx.fillRect(590, 78, 100, 10);
+            this.ctx.strokeStyle = '#000000';
+            this.ctx.lineWidth = 1;
+            this.ctx.strokeRect(590, 78, 100, 10);
             this.ctx.fillStyle = '#ffffff';
-            this.ctx.fillRect(570 + (this.power / 100) * 116, 28, 4, 14);
+            this.ctx.fillRect(590 + (this.power / 100) * 96, 76, 4, 14);
 
-            // SPECIAL Box
-            const spcX = 560, spcY = 44, spcW = 130;
+            // rUMBa Box
+            const spcX = 560, spcY = 96, spcW = 130;
             this.ctx.fillStyle = '#000000';
             this.ctx.fillRect(spcX, spcY, spcW, 18);
-            this.ctx.fillStyle = '#ffffff';
-            this.ctx.font = '700 12px sans-serif';
+            this.ctx.fillStyle = '#0000ff'; // Blue text
+            this.ctx.font = '400 16px "Arial", sans-serif';
             this.ctx.textAlign = 'center';
-            this.ctx.fillText('SPECIAL', spcX + spcW / 2, spcY + 14);
+            this.ctx.fillText('rUMBa', spcX + spcW / 2, spcY + 14);
 
             const charIconsRow1 = [
-                { key: 'shizune', bg: '#0033cc' },
-                { key: 'emi', bg: '#cc0000' },
-                { key: 'misha', bg: '#996600' },
-                { key: 'lilly', bg: '#cc9900' }
+                { key: 'shizune', bg: '#000080' },
+                { key: 'emi', bg: '#800000' },
+                { key: 'misha', bg: '#8b4513' },
+                { key: 'lilly', bg: '#808000' }
             ];
             const charIconsRow2 = [
-                { key: 'mutou', bg: '#0033cc' },
-                { key: 'hanako', bg: '#660066' },
-                { key: 'rin', bg: '#cc0000' }
+                { key: 'mutou', bg: '#00ced1' },
+                { key: 'hanako', bg: '#800080' },
+                { key: 'kenji', bg: '#8b4513' }
             ];
 
             const itemW = 28, itemH = 28;
